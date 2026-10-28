@@ -16,6 +16,7 @@ target/
 
 # ---------- 运行时数据 ----------
 data/
+data-dev/
 logs/
 *.log
 uploads/

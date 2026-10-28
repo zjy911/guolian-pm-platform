@@ -360,8 +360,10 @@ public class TransferService {
                     byReceiver.computeIfAbsent(receiver, k -> new ArrayList<>()).add(bizId);
                 }
                 for (Map.Entry<Long, List<Long>> entry : byReceiver.entrySet()) {
+                    // 接收人组织按「该条数据归属角色」的 org_id 传入，保证 owner_user_id 与 owner_org_id 同步变更
+                    Long orgId = receiverOrgId(adapter, entry.getValue(), entry.getKey());
                     TransferAdapter.TransferOutcome outcome = adapter.transfer(
-                            entity.getFromUserId(), entry.getKey(), entry.getValue());
+                            entity.getFromUserId(), entry.getKey(), orgId, entry.getValue());
                     for (Long bizId : outcome.succeeded()) {
                         saveItem(entity, adapter, bizId, entry.getKey(), "SUCCESS", null);
                         success++;
@@ -407,8 +409,9 @@ public class TransferService {
             for (Map.Entry<Long, List<SysAccountTransferItem>> receiverGroup : byReceiver.entrySet()) {
                 List<Long> ids = receiverGroup.getValue().stream()
                         .map(SysAccountTransferItem::getBizId).toList();
+                Long orgId = receiverOrgId(adapter, ids, receiverGroup.getKey());
                 TransferAdapter.TransferOutcome outcome = adapter.transfer(
-                        entity.getFromUserId(), receiverGroup.getKey(), ids);
+                        entity.getFromUserId(), receiverGroup.getKey(), orgId, ids);
                 for (Long bizId : outcome.succeeded()) {
                     updateItemResult(id, bizId, "SUCCESS", null);
                 }
@@ -495,6 +498,32 @@ public class TransferService {
                 }
             }
         }
+    }
+
+    /**
+     * 解析接收人组织：优先取「该条数据归属角色」绑定的组织（同角色即同组织），
+     * 取不到时回落为接收人默认角色的组织。业务适配器据此同步写 owner_org_id。
+     */
+    private Long receiverOrgId(TransferAdapter adapter, List<Long> bizIds, Long receiverId) {
+        for (Long bizId : bizIds) {
+            String roleCode = adapter.ownerRoleCode(bizId);
+            if (roleCode == null) {
+                continue;
+            }
+            SysRole role = roleMapper.selectOne(Wrappers.<SysRole>lambdaQuery()
+                    .eq(SysRole::getRoleCode, roleCode).last("limit 1"));
+            if (role != null && role.getOrgId() != null) {
+                return role.getOrgId();
+            }
+        }
+        SysUser receiver = userMapper.selectById(receiverId);
+        if (receiver != null && receiver.getDefaultRoleId() != null) {
+            SysRole role = roleMapper.selectById(receiver.getDefaultRoleId());
+            if (role != null) {
+                return role.getOrgId();
+            }
+        }
+        return null;
     }
 
     private void validateReceiverBase(Long userId, Long fromUserId) {

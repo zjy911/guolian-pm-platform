@@ -6,15 +6,7 @@ const Layout = () => import('@/layout/index.vue')
 
 /** 业务模块占位页：由独立方案建设，底座只预留菜单、路由与权限位 */
 const placeholderRoutes: RouteRecordRaw[] = [
-  { path: '/crm/customer', title: '客户管理', perm: 'crm:customer:list' },
-  { path: '/crm/pool', title: '公共客户池', perm: 'crm:pool:list' },
-  { path: '/crm/lead', title: '线索与商机', perm: 'crm:lead:list' },
-  { path: '/crm/follow', title: '销售跟进', perm: 'crm:follow:list' },
-  { path: '/crm/contract', title: '法务合同', perm: 'crm:contract:list' },
-  { path: '/crm/agreement', title: '协议管理', perm: 'crm:agreement:list' },
-  { path: '/crm/bid', title: '投标管理', perm: 'crm:bid:list' },
   { path: '/crm/payment', title: '回款管理', perm: 'crm:payment:list' },
-  { path: '/crm/churn', title: '流失客户', perm: 'crm:churn:list' },
   { path: '/project/product', title: '产品管理', perm: 'project:product:list' },
   { path: '/project/list', title: '项目列表', perm: 'project:project:list' },
   { path: '/project/board', title: '任务看板', perm: 'project:task:list' },
@@ -34,6 +26,106 @@ const placeholderRoutes: RouteRecordRaw[] = [
   meta: { title: item.title, perm: item.perm, placeholder: true }
 }))
 
+/** CRM 模块：路径与 sys_menu.path 严格一致，否则菜单点击会落到 403 */
+const crmRoutes: RouteRecordRaw[] = [
+  {
+    path: '/crm/customer',
+    name: 'crm-account',
+    component: () => import('@/views/crm/account/index.vue'),
+    meta: { title: '客户管理', perm: 'crm:account:list' }
+  },
+  {
+    path: '/crm/pool',
+    name: 'crm-pool',
+    component: () => import('@/views/crm/pool/index.vue'),
+    meta: { title: '公共客户池', perm: 'crm:account:pool' }
+  },
+  {
+    path: '/crm/claim',
+    name: 'crm-claim',
+    component: () => import('@/views/crm/pool/claim.vue'),
+    meta: { title: '客户认领审批', perm: 'crm:account:claim' }
+  },
+  {
+    path: '/crm/churn',
+    name: 'crm-churn',
+    component: () => import('@/views/crm/churn/index.vue'),
+    meta: { title: '流失客户', perm: 'crm:account:list' }
+  },
+  {
+    path: '/crm/contact',
+    name: 'crm-contact',
+    component: () => import('@/views/crm/contact/index.vue'),
+    meta: { title: '联系人管理', perm: 'crm:contact:list' }
+  },
+  {
+    path: '/crm/lead',
+    name: 'crm-lead',
+    component: () => import('@/views/crm/lead/index.vue'),
+    meta: { title: '线索管理', perm: 'crm:lead:list' }
+  },
+  {
+    path: '/crm/lead-convert',
+    name: 'crm-lead-convert',
+    component: () => import('@/views/crm/lead/convert.vue'),
+    meta: { title: '线索转化工作台', perm: 'crm:lead:convert' }
+  },
+  {
+    path: '/crm/opportunity',
+    name: 'crm-opportunity',
+    component: () => import('@/views/crm/opportunity/index.vue'),
+    meta: { title: '商机管理', perm: 'crm:opportunity:list' }
+  },
+  {
+    path: '/crm/opportunity-funnel',
+    name: 'crm-opportunity-funnel',
+    component: () => import('@/views/crm/opportunity/funnel.vue'),
+    meta: { title: '商机漏斗', perm: 'crm:opportunity:list' }
+  },
+  {
+    path: '/crm/follow',
+    name: 'crm-activity',
+    component: () => import('@/views/crm/activity/index.vue'),
+    meta: { title: '销售活动', perm: 'crm:activity:list' }
+  },
+  {
+    path: '/crm/activity-timeline',
+    name: 'crm-activity-timeline',
+    component: () => import('@/views/crm/activity/timeline.vue'),
+    meta: { title: '活动时间线', perm: 'crm:activity:list' }
+  },
+  {
+    path: '/crm/contract',
+    name: 'crm-contract',
+    component: () => import('@/views/crm/contract/index.vue'),
+    meta: { title: '法务合同', perm: 'crm:contract:list' }
+  },
+  {
+    path: '/crm/contract-expire',
+    name: 'crm-contract-expire',
+    component: () => import('@/views/crm/contract/expire.vue'),
+    meta: { title: '合同到期预警', perm: 'crm:contract:list' }
+  },
+  {
+    path: '/crm/agreement',
+    name: 'crm-agreement',
+    component: () => import('@/views/crm/agreement/index.vue'),
+    meta: { title: '协议管理', perm: 'crm:agreement:list' }
+  },
+  {
+    path: '/crm/bid',
+    name: 'crm-bid',
+    component: () => import('@/views/crm/bid/index.vue'),
+    meta: { title: '投标管理', perm: 'crm:bid:list' }
+  },
+  {
+    path: '/crm/bid-calendar',
+    name: 'crm-bid-calendar',
+    component: () => import('@/views/crm/bid/calendar.vue'),
+    meta: { title: '投标日历', perm: 'crm:bid:list' }
+  }
+]
+
 const routes: RouteRecordRaw[] = [
   {
     path: '/login',
@@ -46,6 +138,7 @@ const routes: RouteRecordRaw[] = [
     component: Layout,
     children: [
       { path: '', name: 'home', redirect: '/system/user' },
+      ...crmRoutes,
       ...placeholderRoutes,
       {
         path: '/system/user',

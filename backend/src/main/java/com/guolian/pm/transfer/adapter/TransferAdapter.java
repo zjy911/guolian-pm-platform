@@ -25,6 +25,19 @@ public interface TransferAdapter {
     /** 执行迁移 */
     TransferOutcome transfer(Long fromUserId, Long toUserId, List<Long> bizIds);
 
+    /**
+     * 执行迁移（带接收人组织）。
+     *
+     * <p>业务表同时存 owner_user_id 与 owner_org_id 时，两者必须同一次 update 一起改，
+     * 否则数据会跑到错误的组织范围里。因此底座把「接收人在该角色的 org_id」一并传入，
+     * 业务模块不要去查接收人的默认角色自己推算。
+     *
+     * <p>默认实现忽略 toOrgId，向后兼容只按人归属的适配器。
+     */
+    default TransferOutcome transfer(Long fromUserId, Long toUserId, Long toOrgId, List<Long> bizIds) {
+        return transfer(fromUserId, toUserId, bizIds);
+    }
+
     /** 按明细反向回写（撤销） */
     void rollback(List<RollbackItem> items);
 

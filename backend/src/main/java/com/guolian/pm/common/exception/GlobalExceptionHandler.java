@@ -5,6 +5,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.BindException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import java.util.stream.Collectors;
 
@@ -60,6 +62,25 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.METHOD_NOT_ALLOWED)
     public ApiResponse<Void> handleMethod(HttpRequestMethodNotSupportedException ex) {
         return ApiResponse.fail(ErrorCode.BAD_REQUEST.getCode(), "不支持的请求方法");
+    }
+
+    /**
+     * 路径不存在。Spring 6 对未匹配的静态资源请求抛 NoResourceFoundException，
+     * 若不单独处理会落到兜底 500，把「接口写错」伪装成「服务故障」。
+     */
+    @ExceptionHandler(NoResourceFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ApiResponse<Void> handleNoResource(NoResourceFoundException ex, HttpServletRequest request) {
+        log.warn("接口不存在 uri={}", request.getRequestURI());
+        return ApiResponse.fail(ErrorCode.NOT_FOUND.getCode(), "接口不存在：" + request.getRequestURI());
+    }
+
+    /**
+     * 请求体无法解析（JSON 格式错误、字段类型不匹配）。
+     */
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ApiResponse<Void> handleNotReadable(HttpMessageNotReadableException ex) {
+        return ApiResponse.fail(ErrorCode.BAD_REQUEST.getCode(), "请求体格式不正确，请检查字段类型");
     }
 
     @ExceptionHandler(Exception.class)

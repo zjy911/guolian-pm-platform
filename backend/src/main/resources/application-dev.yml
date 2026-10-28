@@ -13,8 +13,8 @@ spring:
     init:
       mode: always
       encoding: UTF-8
-      schema-locations: classpath:db/h2/schema.sql
-      data-locations: classpath:db/h2/data.sql
+      schema-locations: classpath:db/h2/schema.sql,classpath:db/h2/crm_schema.sql
+      data-locations: classpath:db/h2/data.sql,classpath:db/h2/crm_data.sql
       continue-on-error: false
   h2:
     console:
@@ -47,3 +47,9 @@ app:
 logging:
   level:
     com.guolian.pm: DEBUG
+
+# 开发档用内存缓存，不连 Redis；关掉 Redis 健康探测，避免 /actuator/health 恒为 DOWN
+management:
+  health:
+    redis:
+      enabled: false

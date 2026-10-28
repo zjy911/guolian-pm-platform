@@ -15,8 +15,12 @@ import java.io.IOException;
 /**
  * 脱敏序列化器：按当前角色档位与字段注册算法输出。
  * HIDDEN 时字段直接从 JSON 中移除（不用空串或 null 占位）。
+ *
+ * <p>注意：{@code @Sensitive} 不只标在 String 字段上（金额、成本、利润率是 BigDecimal），
+ * 因此按 Object 处理——只有文本字段参与字符级脱敏，其余类型原样输出，
+ * 避免把数值强转成 String（曾导致 BigDecimal cannot be cast to String 的 500）。</p>
  */
-public class SensitiveSerializer extends JsonSerializer<String> implements ContextualSerializer {
+public class SensitiveSerializer extends JsonSerializer<Object> implements ContextualSerializer {
 
     private final String group;
     private final String fieldName;
@@ -31,21 +35,28 @@ public class SensitiveSerializer extends JsonSerializer<String> implements Conte
     }
 
     @Override
-    public void serialize(String value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
+    public void serialize(Object value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
         if (value == null) {
             gen.writeNull();
             return;
         }
         SensitivePolicyService policy = SpringUtil.getBean(SensitivePolicyService.class);
+        // HIDDEN 档位：整个字段不输出
+        if (policy != null && group != null && policy.isHidden(group)) {
+            gen.writeOmittedField(fieldName);
+            return;
+        }
+        // 非文本字段（金额、比率、日期等）不做字符级脱敏，按原类型输出
+        if (!(value instanceof CharSequence)) {
+            serializers.defaultSerializeValue(value, gen);
+            return;
+        }
+        String text = value.toString();
         if (policy == null) {
             gen.writeString("***");
             return;
         }
-        if (policy.isHidden(group)) {
-            gen.writeOmittedField(fieldName);
-            return;
-        }
-        gen.writeString(policy.mask(group, fieldName, value));
+        gen.writeString(policy.mask(group, fieldName, text));
     }
 
     @Override
