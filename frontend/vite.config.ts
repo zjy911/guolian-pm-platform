@@ -23,5 +23,13 @@ export default defineConfig({
   build: {
     outDir: 'dist',
     chunkSizeWarningLimit: 1200
+  },
+  css: {
+    preprocessorOptions: {
+      // 使用 Sass 现代编译器 API，避免 legacy-js-api 弃用告警
+      scss: {
+        api: 'modern-compiler'
+      }
+    }
   }
 })
