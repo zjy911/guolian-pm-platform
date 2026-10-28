@@ -93,7 +93,7 @@ async function showScopeDebug() {
       </button>
       <div style="display: flex; align-items: center; gap: 8px">
         <div class="pm-logo">联</div>
-        <span style="font-size: 13.5px; font-weight: 600">国联征信项目管理平台</span>
+        <span style="font-size: 13.5px; font-weight: 600">国联政信项目管理平台</span>
         <span
           v-if="isDemo"
           title="静态演示模式：数据为内置模拟数据，写操作不会持久化"

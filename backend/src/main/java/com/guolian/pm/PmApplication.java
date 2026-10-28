@@ -7,7 +7,7 @@ import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
 /**
- * 国联征信项目管理平台 - 底座脚手架启动类。
+ * 国联政信项目管理平台 - 底座脚手架启动类。
  */
 @SpringBootApplication
 @MapperScan("com.guolian.pm.**.mapper")

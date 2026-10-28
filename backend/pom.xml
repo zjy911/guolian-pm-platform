@@ -15,7 +15,7 @@
     <artifactId>pm-platform</artifactId>
     <version>1.0.0</version>
     <name>guolian-pm-platform</name>
-    <description>国联征信项目管理平台 - 底座脚手架</description>
+    <description>国联政信项目管理平台 - 底座脚手架</description>
 
     <properties>
         <java.version>17</java.version>

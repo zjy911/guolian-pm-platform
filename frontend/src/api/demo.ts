@@ -59,8 +59,8 @@ const ownerOf = (id?: number | null) => {
 }
 
 const COMPANIES = [
-  { id: 1, companyCode: 'GL-C001', companyName: '国联征信股份有限公司', shortName: '国联征信总部' },
-  { id: 2, companyCode: 'GL-C002', companyName: '国联征信（上海）有限公司', shortName: '上海分公司' }
+  { id: 1, companyCode: 'GL-C001', companyName: '国联政信股份有限公司', shortName: '国联政信总部' },
+  { id: 2, companyCode: 'GL-C002', companyName: '国联政信（上海）有限公司', shortName: '上海分公司' }
 ]
 
 const ORG_TREE = [
@@ -443,7 +443,7 @@ const MENUS: MenuNode[] = [
 function profileOf(): Profile {
   return {
     userId: 1, username: 'admin', realName: '王建国', roleId: 101, roleCode: 'SUPER_ADMIN', roleName: '超级管理员',
-    orgId: 1, orgName: '总公司', orgPath: '总公司', companyNames: '国联征信股份有限公司', dataScope: 'ALL',
+    orgId: 1, orgName: '总公司', orgPath: '总公司', companyNames: '国联政信股份有限公司', dataScope: 'ALL',
     dataScopeLabel: '全部数据', impersonate: false, readOnly: false, firstLogin: false, perms: ['*:*:*']
   }
 }
@@ -768,7 +768,7 @@ function compareMatrix(id: number) {
   const opp = opportunities.find((o) => o.id === id) ?? opportunities[0]
   const rows = competitors.filter((c) => c.opportunityId === id)
   const ours = {
-    name: '国联征信', staffSize: 800, coverageScope: '全国', techAbility: '自研数据底座，覆盖 3 亿企业画像',
+    name: '国联政信', staffSize: 800, coverageScope: '全国', techAbility: '自研数据底座，覆盖 3 亿企业画像',
     pricingMode: opp.pricingMode, pricingDetail: opp.pricingDetail, operationEfficiency: '高（7×24 响应）', operationQuality: '通过等保三级'
   }
   const theirs = rows.map((c) => ({ ...c }))
@@ -817,9 +817,9 @@ function usersVo() {
     id: u.id, username: u.username, realName: u.realName, employeeNo: `E00${u.id}`,
     mobile: `1360000000${u.id}`, email: `${u.username}@guolian.com`, status: 1,
     employeeType: 'FORMAL', position: u.roleName, orgId: u.orgId, orgName: u.orgName,
-    companyNames: '国联征信股份有限公司', lastLoginTime: '2026-10-28 09:00:00',
+    companyNames: '国联政信股份有限公司', lastLoginTime: '2026-10-28 09:00:00',
     roles: [{ userId: u.id, roleId: u.roleId, roleCode: u.roleCode, roleName: u.roleName, orgId: u.orgId, orgName: u.orgName, isDefault: 1, dataScope: 'ALL' }],
-    companies: [{ companyId: 1, companyName: '国联征信股份有限公司', relationType: 1 }]
+    companies: [{ companyId: 1, companyName: '国联政信股份有限公司', relationType: 1 }]
   }))
 }
 

@@ -65,7 +65,7 @@ class PlatformIntegrationTest {
         assertThat(node.get("code").asInt()).isZero();
         JsonNode data = node.get("data");
         JsonNode profile = data.get("profile");
-        assertThat(profile.get("orgName").asText()).isEqualTo("国联征信");
+        assertThat(profile.get("orgName").asText()).isEqualTo("国联政信");
         assertThat(profile.get("dataScopeLabel").asText()).isEqualTo("全部数据");
         assertThat(data.get("menus")).hasSize(4);
         assertThat(data.get("menus").get(0).get("name").asText()).isEqualTo("CRM");

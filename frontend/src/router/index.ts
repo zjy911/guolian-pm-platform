@@ -266,7 +266,7 @@ const router = createRouter({
 })
 
 router.beforeEach(async (to) => {
-  document.title = to.meta.title ? `${to.meta.title} · 国联征信项目管理平台` : '国联征信项目管理平台'
+  document.title = to.meta.title ? `${to.meta.title} · 国联政信项目管理平台` : '国联政信项目管理平台'
   if (to.meta.public) {
     return true
   }

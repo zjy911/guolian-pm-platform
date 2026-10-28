@@ -5,7 +5,7 @@
 
 -- ---------- 组织架构：集团 → 8 BG + 10 职能部门 + 6 地区部 ----------
 INSERT INTO sys_org (id, org_code, org_name, org_type, parent_id, ancestors, leader_id, sort_no, status) VALUES
- (1,'GL','国联征信','GROUP',0,'0',NULL,1,1),
+ (1,'GL','国联政信','GROUP',0,'0',NULL,1,1),
  (2,'GL-BG-G','G端BG','BG',1,'0,1',NULL,2,1),
  (3,'GL-BG-HH','和合BG','BG',1,'0,1',NULL,3,1),
  (4,'GL-BG-SL','丝路BG','BG',1,'0,1',NULL,4,1),
@@ -38,8 +38,8 @@ INSERT INTO sys_org (id, org_code, org_name, org_type, parent_id, ancestors, lea
 
 -- ---------- 公司主体（与组织无直接关系） ----------
 INSERT INTO sys_company (id, company_code, company_name, short_name, company_type, legal_person, credit_code, reg_address, office_address, tax_no, bank_name, bank_account, status) VALUES
- (1,'GL-CREDIT','国联征信有限公司','国联征信','HEAD','张建国','91110108MA01ABCD1X','北京市海淀区中关村南大街 1 号','北京市海淀区中关村南大街 1 号 A 座 12 层','91110108MA01ABCD1X','中国银行北京海淀支行','6217 8501 0000 1234 567',1),
- (2,'GL-TECH','国联征信科技（北京）有限公司','国联征信科技','SUB','李明','91110108MA02EFGH2Y','北京市朝阳区建国路 88 号','北京市朝阳区建国路 88 号 B 座 8 层','91110108MA02EFGH2Y','招商银行北京朝阳支行','6225 8801 0000 9876 543',1);
+ (1,'GL-CREDIT','国联政信有限公司','国联政信','HEAD','张建国','91110108MA01ABCD1X','北京市海淀区中关村南大街 1 号','北京市海淀区中关村南大街 1 号 A 座 12 层','91110108MA01ABCD1X','中国银行北京海淀支行','6217 8501 0000 1234 567',1),
+ (2,'GL-TECH','国联政信科技（北京）有限公司','国联政信科技','SUB','李明','91110108MA02EFGH2Y','北京市朝阳区建国路 88 号','北京市朝阳区建国路 88 号 B 座 8 层','91110108MA02EFGH2Y','招商银行北京朝阳支行','6225 8801 0000 9876 543',1);
 
 -- ---------- 角色（每个角色必绑一个组织） ----------
 INSERT INTO sys_role (id, role_code, role_name, org_id, description, role_type, data_scope, can_be_project_member, can_be_approver, sort_no, status) VALUES

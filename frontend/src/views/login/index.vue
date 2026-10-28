@@ -40,7 +40,7 @@ async function submit() {
   <div class="pm-login-page">
     <section class="pm-login-brand">
       <div class="pm-logo" style="background: #fff">联</div>
-      <h1>国联征信<br />项目管理平台</h1>
+      <h1>国联政信<br />项目管理平台</h1>
       <p>底座框架 + 系统管理 + 通用审批能力。CRM、项目管理、驾驶舱由独立方案接入，底座已预留菜单、路由与权限位。</p>
       <ul>
         <li>· 角色即身份：切角色同时切组织、菜单、数据范围与脱敏策略</li>
