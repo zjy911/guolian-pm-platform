@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xmlns:flowable="http://flowable.org/bpmn"
+             targetNamespace="http://guolian.com/pm">
+
+    <!-- 引擎能力自证：三人会签（全通过）+ 金额条件分支 -->
+    <process id="_DEMO_CONDITION" name="引擎能力自证（条件分支+会签）" isExecutable="true">
+        <startEvent id="start" name="发起"/>
+        <sequenceFlow id="d1" sourceRef="start" targetRef="sign3"/>
+
+        <userTask id="sign3" name="三人会签" flowable:assignee="${assignee}">
+            <multiInstanceLoopCharacteristics isSequential="false"
+                                              flowable:collection="${users_sign3}"
+                                              flowable:elementVariable="assignee">
+                <completionCondition>${nrOfCompletedInstances == nrOfInstances}</completionCondition>
+            </multiInstanceLoopCharacteristics>
+        </userTask>
+        <sequenceFlow id="d2" sourceRef="sign3" targetRef="amountGateway"/>
+
+        <exclusiveGateway id="amountGateway" name="金额判断" default="d4"/>
+        <sequenceFlow id="d3" sourceRef="amountGateway" targetRef="finance">
+            <conditionExpression xsi:type="tFormalExpression">${amount &gt; 1000000}</conditionExpression>
+        </sequenceFlow>
+        <sequenceFlow id="d4" sourceRef="amountGateway" targetRef="end"/>
+
+        <userTask id="finance" name="财务审批" flowable:assignee="${apv_finance}"/>
+        <sequenceFlow id="d5" sourceRef="finance" targetRef="end"/>
+
+        <endEvent id="end" name="结束"/>
+    </process>
+</definitions>

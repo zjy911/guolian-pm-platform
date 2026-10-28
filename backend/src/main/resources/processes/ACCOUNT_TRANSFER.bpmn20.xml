@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xmlns:flowable="http://flowable.org/bpmn"
+             targetNamespace="http://guolian.com/pm">
+
+    <!-- 账号交接审批：直属上级 → 部门负责人 → 人力资源（候选角色） -->
+    <process id="ACCOUNT_TRANSFER" name="账号交接审批" isExecutable="true">
+        <startEvent id="start" name="发起交接"/>
+        <sequenceFlow id="f1" sourceRef="start" targetRef="leader"/>
+
+        <userTask id="leader" name="直属上级" flowable:assignee="${apv_leader}">
+            <documentation>交出人的直属上级审批</documentation>
+        </userTask>
+        <sequenceFlow id="f2" sourceRef="leader" targetRef="deptLeader"/>
+
+        <userTask id="deptLeader" name="部门负责人" flowable:assignee="${apv_deptLeader}"/>
+        <sequenceFlow id="f3" sourceRef="deptLeader" targetRef="hr"/>
+
+        <userTask id="hr" name="人力资源" flowable:candidateGroups="${grp_hr}"/>
+        <sequenceFlow id="f4" sourceRef="hr" targetRef="end"/>
+
+        <endEvent id="end" name="结束"/>
+    </process>
+</definitions>

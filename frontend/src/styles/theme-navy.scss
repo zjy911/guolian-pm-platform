@@ -1,0 +1,68 @@
+// ============================================================
+// 深海蓝企业级轻科技主题令牌
+// 仅在本文件定义色值，业务组件一律使用 var(--pm-*)，禁止裸色值
+// ============================================================
+
+:root {
+  // 主色阶
+  --pm-primary-50: #eef2f8;
+  --pm-primary-100: #dce3ef;
+  --pm-primary-200: #b9c7df;
+  --pm-primary-300: #8fa5c9;
+  --pm-primary-400: #5f7daf;
+  --pm-primary-500: #3b5d92;
+  --pm-primary-600: #2a4a7a;
+  --pm-primary-700: #1f3864;
+  --pm-primary-800: #172b4d;
+  --pm-primary-900: #0f1d36;
+
+  // 中性色
+  --pm-neutral-0: #ffffff;
+  --pm-neutral-25: #fafbfc;
+  --pm-neutral-50: #f7f8fa;
+  --pm-neutral-100: #eef1f5;
+  --pm-neutral-200: #d9dee7;
+  --pm-neutral-400: #98a2b3;
+  --pm-neutral-500: #667085;
+  --pm-neutral-700: #344054;
+  --pm-neutral-900: #101828;
+
+  // 语义色
+  --pm-success: #1f9d55;
+  --pm-success-bg: #e8f7ef;
+  --pm-warning: #d97706;
+  --pm-warning-bg: #fef3e2;
+  --pm-danger: #d92d20;
+  --pm-danger-bg: #fdecea;
+  --pm-info: #2e90fa;
+  --pm-info-bg: #eaf4ff;
+
+  // 布局尺寸
+  --pm-topbar-height: 56px;
+  --pm-sidebar-width: 240px;
+  --pm-sidebar-collapsed: 64px;
+  --pm-content-max: 1440px;
+  --pm-gutter: 24px;
+  --pm-table-row: 48px;
+  --pm-control-height: 36px;
+
+  // 圆角与阴影
+  --pm-radius-card: 12px;
+  --pm-radius-control: 8px;
+  --pm-shadow-card: 0 1px 2px rgba(16, 24, 40, 0.06), 0 4px 12px rgba(16, 24, 40, 0.06);
+  --pm-shadow-modal: 0 12px 32px rgba(16, 24, 40, 0.16);
+  --pm-mask: rgba(15, 29, 54, 0.45);
+  --pm-focus-ring: rgba(31, 56, 100, 0.24);
+
+  // Tabler 变量覆盖
+  --tblr-primary: var(--pm-primary-700);
+  --tblr-primary-rgb: 31, 56, 100;
+  --tblr-body-bg: var(--pm-neutral-50);
+  --tblr-body-color: var(--pm-neutral-900);
+  --tblr-secondary-color: var(--pm-neutral-500);
+  --tblr-border-color: var(--pm-neutral-200);
+  --tblr-border-radius: var(--pm-radius-control);
+  --tblr-border-radius-lg: var(--pm-radius-card);
+  --tblr-font-sans-serif: 'Inter', 'Source Han Sans SC', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  --tblr-shadow-card: var(--pm-shadow-card);
+}

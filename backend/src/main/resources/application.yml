@@ -1,0 +1,86 @@
+server:
+  port: ${SERVER_PORT:8080}
+  shutdown: graceful
+
+spring:
+  application:
+    name: pm-platform
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:dev}
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: GMT+8
+    serialization:
+      write-dates-as-timestamps: false
+  lifecycle:
+    timeout-per-shutdown-phase: 20s
+  servlet:
+    encoding:
+      charset: UTF-8
+      enabled: true
+      force: true
+    multipart:
+      max-file-size: 20MB
+      max-request-size: 40MB
+
+mybatis-plus:
+  configuration:
+    map-underscore-to-camel-case: true
+  global-config:
+    banner: false
+    db-config:
+      id-type: assign_id
+      logic-delete-field: isDeleted
+      logic-delete-value: 1
+      logic-not-delete-value: 0
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: always
+      probes:
+        enabled: true
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+
+knife4j:
+  enable: true
+  setting:
+    language: zh_cn
+
+# 业务配置：全部来自环境变量，启动时由 AppProperties 集中校验
+app:
+  jwt:
+    secret: ${JWT_SECRET:}
+    access-token-minutes: ${JWT_ACCESS_MINUTES:120}
+    impersonate-max-hours: ${IMPERSONATE_MAX_HOURS:2}
+  cors:
+    allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:5173,http://127.0.0.1:5173}
+  cache:
+    type: ${CACHE_TYPE:memory}
+    ttl-seconds: ${CACHE_TTL_SECONDS:300}
+  security:
+    login-fail-lock-count: ${LOGIN_FAIL_LOCK_COUNT:5}
+    login-fail-lock-minutes: ${LOGIN_FAIL_LOCK_MINUTES:10}
+  debug:
+    impersonate-enabled: ${DEBUG_IMPERSONATE_ENABLED:false}
+  transfer:
+    revoke-days: ${TRANSFER_REVOKE_DAYS:7}
+    batch-size: ${TRANSFER_BATCH_SIZE:200}
+    max-items-per-type: ${TRANSFER_MAX_ITEMS:5000}
+  upload:
+    dir: ${UPLOAD_DIR:./data/uploads}
+
+logging:
+  level:
+    root: INFO
+    com.guolian.pm: INFO
+    org.flowable: WARN

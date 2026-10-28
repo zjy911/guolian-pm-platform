@@ -1,0 +1,39 @@
+# ---------- 依赖与构建产物 ----------
+node_modules/
+dist/
+target/
+*.class
+*.jar
+!.mvn/wrapper/maven-wrapper.jar
+
+# ---------- 环境与密钥 ----------
+.env
+.env.local
+.env.*.local
+*.pem
+*.p12
+*.jks
+
+# ---------- 运行时数据 ----------
+data/
+logs/
+*.log
+uploads/
+
+# ---------- 本地工具（本机验证用的便携 JDK / Maven） ----------
+.tools/
+
+# ---------- IDE ----------
+.idea/
+.vscode/
+*.iml
+*.ipr
+*.iws
+.settings/
+.project
+.classpath
+
+# ---------- 系统 ----------
+.DS_Store
+Thumbs.db
+desktop.ini

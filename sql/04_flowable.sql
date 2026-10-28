@@ -1,0 +1,33 @@
+-- ============================================================
+-- Flowable 7.1.0 ACT_* 建表方案
+-- ============================================================
+-- 底座不手写 ACT_* 表结构，避免与引擎版本漂移。规则如下：
+--
+-- 【开发 / 测试环境】
+--   flowable.database-schema-update: true
+--   引擎启动时自动创建 ACT_RE_* / ACT_RU_* / ACT_HI_* / ACT_GE_* 全部表。
+--
+-- 【生产环境】
+--   1) 首次上线：在一个受控的发布窗口内临时设置
+--        flowable.database-schema-update: true
+--      启动一次，让引擎完成建表；随后立即改回 false（application-prod.yml 默认即为 false）。
+--   2) 需要纳入变更管理时，从已建库导出 DDL 作为版本化脚本：
+--        mysqldump -u root -p --no-data pm_platform \
+--          $(mysql -u root -p -N -e "select group_concat(table_name) from information_schema.tables \
+--             where table_schema='pm_platform' and table_name like 'ACT\_%'") > 04_flowable_ddl.sql
+--      之后所有环境按该脚本初始化，flowable.database-schema-update 保持 false。
+--   3) 版本升级（例如 7.1.0 → 7.2.x）前，先在预发环境用 true 跑一次，
+--      比对 ACT_GE_PROPERTY 中 schema.version 的差异，再决定是否执行升级脚本。
+--
+-- 【审批模板部署】
+--   resources/processes/ 下的 BPMN 由 flowable.check-process-definitions=true 自动部署：
+--     - ACCOUNT_TRANSFER.bpmn20.xml   账号交接（直属上级 → 部门负责人 → 人力资源）
+--     - _DEMO_CONDITION.bpmn20.xml    引擎能力自证（三人会签 + 金额条件分支）
+--   平台「审批流程」页面新建的模板发布时，由 BpmnGenerator 生成 XML 并
+--   通过 repositoryService.createDeployment() 部署，回写 sys_flow_def。
+--
+-- 【自建表与引擎表的关系】
+--   sys_flow_def  审批模板配置（表单化配置的 JSON 快照 + 部署版本）
+--   sys_flow_biz  业务单据映射（businessKey → 业务标题与跳转路由）
+--   实例与任务本身全部落在 ACT_* 原生表，底座不重复造实例表 / 任务表。
+-- ============================================================
