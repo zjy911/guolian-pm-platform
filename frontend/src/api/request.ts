@@ -1,5 +1,6 @@
 import axios, { AxiosError, type AxiosInstance, type AxiosRequestConfig } from 'axios'
 import type { ApiResponse } from './types'
+import { DEMO, demoRequest } from './demo'
 
 /**
  * 统一请求封装：
@@ -104,27 +105,36 @@ http.interceptors.response.use(
 )
 
 export async function get<T>(url: string, params?: Record<string, unknown>): Promise<T> {
+  if (DEMO) return demoRequest<T>('GET', url, params)
   const res = await http.get<ApiResponse<T>>(url, { params })
   return res.data.data
 }
 
 export async function post<T>(url: string, data?: unknown): Promise<T> {
+  if (DEMO) return demoRequest<T>('POST', url, undefined, data)
   const res = await http.post<ApiResponse<T>>(url, data ?? {})
   return res.data.data
 }
 
 export async function put<T>(url: string, data?: unknown): Promise<T> {
+  if (DEMO) return demoRequest<T>('PUT', url, undefined, data)
   const res = await http.put<ApiResponse<T>>(url, data ?? {})
   return res.data.data
 }
 
 export async function del<T>(url: string): Promise<T> {
+  if (DEMO) return demoRequest<T>('DELETE', url)
   const res = await http.delete<ApiResponse<T>>(url)
   return res.data.data
 }
 
 /** 文件下载（导出 / 附件） */
 export async function download(url: string, filename: string, params?: Record<string, unknown>) {
+  if (DEMO) {
+    // 演示模式没有真实文件，弹出提示即可
+    window.alert(`演示模式：${filename} 下载不可用`)
+    return
+  }
   const res = await http.get(url, { params, responseType: 'blob' })
   const blob = new Blob([res.data as BlobPart])
   const link = document.createElement('a')

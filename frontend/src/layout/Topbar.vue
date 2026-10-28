@@ -4,6 +4,7 @@ import { useRouter } from 'vue-router'
 import { useAppStore } from '@/stores/app'
 import { useUserStore } from '@/stores/user'
 import { authApi } from '@/api'
+import { DEMO as isDemo } from '@/api/demo'
 import NoticeDrawer from './NoticeDrawer.vue'
 
 const appStore = useAppStore()
@@ -93,6 +94,11 @@ async function showScopeDebug() {
       <div style="display: flex; align-items: center; gap: 8px">
         <div class="pm-logo">联</div>
         <span style="font-size: 13.5px; font-weight: 600">国联征信项目管理平台</span>
+        <span
+          v-if="isDemo"
+          title="静态演示模式：数据为内置模拟数据，写操作不会持久化"
+          style="font-size: 11px; padding: 2px 8px; border-radius: 999px; background: var(--pm-warning-bg, #fff7e6); color: #ad6800; border: 1px solid #ffd591; font-weight: 500"
+        >演示模式</span>
       </div>
     </div>
 
