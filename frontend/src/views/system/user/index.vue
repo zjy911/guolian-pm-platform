@@ -1,11 +1,12 @@
 <script setup lang="ts">
 import { computed, onMounted, reactive, ref, watch } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import PageHeader from '@/components/PageHeader.vue'
 import FormDrawer from '@/components/FormDrawer.vue'
 import Pagination from '@/components/Pagination.vue'
 import { companyApi, dictApi, orgApi, roleApi, userApi } from '@/api'
 import { authApi } from '@/api'
+import { PM_PROJECT_ROLE, userProjectApi, projectApi, type UserProjectView } from '@/api/pm'
 import type { CompanyVO, DictItem, OrgVO, RoleVO, UserVO } from '@/api/types'
 import { useAppStore } from '@/stores/app'
 import { useUserStore } from '@/stores/user'
@@ -13,6 +14,7 @@ import { useUserStore } from '@/stores/user'
 const appStore = useAppStore()
 const userStore = useUserStore()
 const route = useRoute()
+const router = useRouter()
 
 const list = ref<UserVO[]>([])
 const total = ref(0)
@@ -57,12 +59,30 @@ const form = reactive<Record<string, any>>({
   jobLevel: '',
   joinDate: '',
   leaveDate: '',
+  certStatus: 'NONE',
+  certItem: '',
+  certExpireDate: '',
   status: 1,
   remark: '',
   roleIds: [] as number[],
   defaultRoleId: null as number | null,
   companies: [] as { companyId: number; relationType: number; isPrimary: number }[]
 })
+
+// 关联项目（PRD 六：人员与项目双向可查）
+const userProjects = ref<UserProjectView[]>([])
+const userRatio = ref(0)
+const assignOpen = ref(false)
+const assigning = ref(false)
+const assignForm = reactive({
+  projectId: null as number | null,
+  projectRole: 'IMPLEMENT_LEADER',
+  inputRatio: 30,
+  joinDate: '',
+  expectedLeaveDate: ''
+})
+const projectOptions = ref<{ id: number; label: string }[]>([])
+const canRelease = computed(() => userStore.hasPerm('system:user:list'))
 
 const canAdd = computed(() => userStore.hasPerm('system:user:add'))
 const canEdit = computed(() => userStore.hasPerm('system:user:edit'))
@@ -132,6 +152,9 @@ function resetForm() {
     jobLevel: '',
     joinDate: '',
     leaveDate: '',
+    certStatus: 'NONE',
+    certItem: '',
+    certExpireDate: '',
     status: 1,
     remark: '',
     roleIds: [],
@@ -162,6 +185,9 @@ function openEdit(row: UserVO) {
     jobLevel: row.jobLevel ?? '',
     joinDate: row.joinDate ?? '',
     leaveDate: row.leaveDate ?? '',
+    certStatus: row.certStatus ?? 'NONE',
+    certItem: row.certItem ?? '',
+    certExpireDate: row.certExpireDate ?? '',
     status: row.status,
     remark: row.remark ?? '',
     roleIds: row.roles.map((role) => role.roleId),
@@ -226,6 +252,9 @@ async function submit() {
       jobLevel: form.jobLevel || undefined,
       joinDate: form.joinDate || undefined,
       leaveDate: form.leaveDate || undefined,
+      certStatus: form.certStatus,
+      certItem: form.certItem || undefined,
+      certExpireDate: form.certExpireDate || undefined,
       status: form.status,
       remark: form.remark || undefined,
       roleIds: form.roleIds,
@@ -255,9 +284,78 @@ async function openDetail(row: UserVO) {
   try {
     detail.value = await userApi.detail(row.id)
     detailOpen.value = true
+    await loadUserProjects(row.id)
   } catch (error) {
     appStore.toast(appStore.errorMessage(error), 'error')
   }
+}
+
+async function loadUserProjects(userId: number) {
+  try {
+    const [projects, ratio] = await Promise.all([userProjectApi.list(userId), userProjectApi.ratio(userId)])
+    userProjects.value = projects
+    userRatio.value = ratio.activeRatio
+  } catch (error) {
+    userProjects.value = []
+    userRatio.value = 0
+  }
+}
+
+async function openAssign() {
+  if (!detail.value) return
+  assignForm.projectId = null
+  assignForm.projectRole = 'IMPLEMENT_LEADER'
+  assignForm.inputRatio = 30
+  assignForm.joinDate = new Date().toISOString().slice(0, 10)
+  assignForm.expectedLeaveDate = ''
+  try {
+    const page = await projectApi.page({ pageNum: 1, pageSize: 100 })
+    projectOptions.value = page.list.map((p) => ({ id: p.id, label: `${p.projectCode} · ${p.projectName}` }))
+  } catch {
+    projectOptions.value = []
+  }
+  assignOpen.value = true
+}
+
+async function submitAssign() {
+  if (!detail.value || !assignForm.projectId) {
+    appStore.toast('请选择项目', 'error')
+    return
+  }
+  assigning.value = true
+  try {
+    await userProjectApi.assign(detail.value.id, {
+      projectId: assignForm.projectId,
+      projectRole: assignForm.projectRole,
+      inputRatio: assignForm.inputRatio,
+      joinDate: assignForm.joinDate || undefined,
+      expectedLeaveDate: assignForm.expectedLeaveDate || undefined
+    })
+    appStore.toast('已指派进项目')
+    assignOpen.value = false
+    await loadUserProjects(detail.value.id)
+  } catch (error) {
+    appStore.toast(appStore.errorMessage(error), 'error')
+  } finally {
+    assigning.value = false
+  }
+}
+
+async function releaseProject(member: UserProjectView) {
+  if (!detail.value) return
+  if (!confirm(`确认释放「${member.projectName}」的投入（${member.inputRatio}%）？`)) return
+  try {
+    await userProjectApi.release(member.projectId, member.memberId)
+    appStore.toast('已释放出场，投入比例已回收')
+    await loadUserProjects(detail.value.id)
+  } catch (error) {
+    appStore.toast(appStore.errorMessage(error), 'error')
+  }
+}
+
+function gotoProject(projectId: number) {
+  detailOpen.value = false
+  router.push(`/project/workspace/${projectId}`)
 }
 
 async function resetPassword(row: UserVO) {
@@ -489,6 +587,22 @@ onMounted(async () => {
           <input v-model="form.joinDate" type="date" class="pm-input" />
         </div>
         <div class="pm-form-item">
+          <label>上岗认证</label>
+          <select v-model="form.certStatus" class="pm-select">
+            <option value="NONE">未认证</option>
+            <option value="CERTIFIED">已认证</option>
+            <option value="EXPIRED">已过期</option>
+          </select>
+        </div>
+        <div v-if="form.certStatus === 'CERTIFIED'" class="pm-form-item">
+          <label>认证项</label>
+          <input v-model="form.certItem" class="pm-input" placeholder="如：调解员上岗认证" />
+        </div>
+        <div v-if="form.certStatus === 'CERTIFIED'" class="pm-form-item">
+          <label>认证有效期</label>
+          <input v-model="form.certExpireDate" type="date" class="pm-input" />
+        </div>
+        <div class="pm-form-item">
           <label>用户状态</label>
           <select v-model="form.status" class="pm-select">
             <option v-for="item in statuses" :key="item.dictValue" :value="Number(item.dictValue)">{{ item.dictLabel }}</option>
@@ -583,8 +697,48 @@ onMounted(async () => {
       </div>
 
       <div v-else-if="detailTab === 'projects'">
-        <div class="pm-tag is-muted">数据由项目管理模块提供</div>
-        <div class="pm-empty">当前用户暂无参与项目（底座只做只读展示，不含项目新增/编辑入口）</div>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px">
+          <div class="pm-tag" :class="userRatio > 100 ? 'is-danger' : userRatio > 80 ? 'is-warning' : 'is-muted'">
+            在办投入比例合计：{{ userRatio }}% / 100%
+          </div>
+          <button class="pm-btn is-primary" @click="openAssign"><i class="ti ti-plus" /> 指派进项目</button>
+        </div>
+        <table class="pm-table">
+          <thead>
+            <tr>
+              <th>项目编号 / 名称</th><th>所属产品</th><th>项目角色</th><th>投入</th>
+              <th>进场</th><th>预计出场</th><th>在办任务</th><th>状态</th><th>操作</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="member in userProjects" :key="member.memberId">
+              <td>
+                <a style="cursor: pointer; color: var(--pm-primary-600)" @click="gotoProject(member.projectId)">
+                  {{ member.projectCode }}
+                </a>
+                <div style="font-size: 12px">{{ member.projectName }}</div>
+              </td>
+              <td>{{ member.productName }}</td>
+              <td>{{ member.projectRoleLabel }}</td>
+              <td>{{ member.inputRatio }}%</td>
+              <td>{{ member.joinDate ?? '—' }}</td>
+              <td>{{ member.expectedLeaveDate ?? '—' }}</td>
+              <td>{{ member.active ? member.openTaskCount : '—' }}</td>
+              <td>
+                <span class="pm-tag" :class="member.active ? 'is-success' : 'is-muted'">
+                  {{ member.active ? '在办' : '已出场' }}
+                </span>
+              </td>
+              <td>
+                <button v-if="member.active && canRelease" class="pm-btn is-sm" @click="releaseProject(member)">释放出场</button>
+                <span v-else-if="member.evaluation" :title="member.evaluation" style="font-size: 12px">评价已归档</span>
+              </td>
+            </tr>
+            <tr v-if="userProjects.length === 0">
+              <td colspan="9" class="pm-empty">暂无参与项目，点击右上角「指派进项目」建立关联</td>
+            </tr>
+          </tbody>
+        </table>
       </div>
 
       <div v-else>
@@ -593,6 +747,45 @@ onMounted(async () => {
         </div>
       </div>
     </FormDrawer>
+
+    <!-- 指派进项目 -->
+    <div v-if="assignOpen" class="pm-drawer-mask" @click.self="assignOpen = false">
+      <div class="pm-card" style="width: 420px; margin: auto">
+        <h3 style="margin: 0 0 12px; font-size: 15px">指派进项目 · {{ detail?.realName }}</h3>
+        <div class="pm-form-item">
+          <label><span class="pm-required">*</span>选择项目</label>
+          <select v-model="assignForm.projectId" class="pm-select">
+            <option :value="null">请选择</option>
+            <option v-for="p in projectOptions" :key="p.id" :value="p.id">{{ p.label }}</option>
+          </select>
+        </div>
+        <div class="pm-form-item">
+          <label><span class="pm-required">*</span>项目角色</label>
+          <select v-model="assignForm.projectRole" class="pm-select">
+            <option v-for="(label, key) in PM_PROJECT_ROLE" :key="key" :value="key">{{ label }}</option>
+          </select>
+        </div>
+        <div class="pm-form-item">
+          <label><span class="pm-required">*</span>投入比例（%）</label>
+          <input v-model.number="assignForm.inputRatio" type="number" min="0" max="100" class="pm-input" />
+          <p style="font-size: 12px; color: var(--pm-neutral-500); margin: 4px 0 0">
+            当前在办合计 {{ userRatio }}%，本次后为 {{ userRatio + (assignForm.inputRatio || 0) }}%（上限 100%）
+          </p>
+        </div>
+        <div class="pm-form-item">
+          <label>进场日期</label>
+          <input v-model="assignForm.joinDate" type="date" class="pm-input" />
+        </div>
+        <div class="pm-form-item">
+          <label>预计出场日期</label>
+          <input v-model="assignForm.expectedLeaveDate" type="date" class="pm-input" />
+        </div>
+        <div style="display: flex; justify-content: flex-end; gap: 8px">
+          <button class="pm-btn" @click="assignOpen = false">取消</button>
+          <button class="pm-btn is-primary" :disabled="assigning" @click="submitAssign">确认指派</button>
+        </div>
+      </div>
+    </div>
 
     <div v-if="resetPasswordVisible" class="pm-drawer-mask" @click.self="resetPasswordVisible = false">
       <div class="pm-card" style="width: 360px; margin: auto">

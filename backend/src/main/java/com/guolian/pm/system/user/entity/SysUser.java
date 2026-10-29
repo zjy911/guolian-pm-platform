@@ -34,6 +34,10 @@ public class SysUser extends BaseEntity {
     private String jobLevel;
     private LocalDate joinDate;
     private LocalDate leaveDate;
+    /** 上岗认证状态：NONE 未认证 / CERTIFIED 已认证 / EXPIRED 已过期（PRD 6.2） */
+    private String certStatus;
+    private String certItem;
+    private LocalDate certExpireDate;
     /** 1 正常 / 2 停用 / 3 离职 / 4 锁定 */
     private Integer status;
     private Long defaultRoleId;

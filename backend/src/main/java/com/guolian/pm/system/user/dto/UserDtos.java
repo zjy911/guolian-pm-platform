@@ -72,6 +72,9 @@ public class UserDtos {
         private String jobLevel;
         private LocalDate joinDate;
         private LocalDate leaveDate;
+        private String certStatus;
+        private String certItem;
+        private LocalDate certExpireDate;
         private Integer status = 1;
         private String remark;
 

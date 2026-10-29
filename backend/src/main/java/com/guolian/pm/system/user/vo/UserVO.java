@@ -38,6 +38,9 @@ public class UserVO {
     private String jobLevel;
     private LocalDate joinDate;
     private LocalDate leaveDate;
+    private String certStatus;
+    private String certItem;
+    private LocalDate certExpireDate;
     private Integer status;
     private Long defaultRoleId;
     private Long orgId;

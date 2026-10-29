@@ -739,7 +739,78 @@ const routes: [string, RegExp, Handler][] = [
   ]],
   ['GET', /^\/system\/transfers\/(\d+)$/, () => transferVo()[0]],
   ['POST', /^\/system\/transfers$/, () => ({ id: nextId++ })],
-  ['POST', /^\/system\/transfers\/(\d+)\/(submit|execute|retry|revoke)/, () => ({ processInstanceId: `demo-flow-${nextId++}` })]
+  ['POST', /^\/system\/transfers\/(\d+)\/(submit|execute|retry|revoke)/, () => ({ processInstanceId: `demo-flow-${nextId++}` })],
+
+  // ---------------- 项目管理（PM） ----------------
+  ['GET', /^\/project\/products$/, ({ query }) => page(pmProducts, query)],
+  ['GET', /^\/project\/products\/(\d+)$/, (_c, id) => ({
+    product: pmProducts.find((p) => p.id === Number(id)) ?? pmProducts[0],
+    template: { templateJson: JSON.stringify(pmTemplateSections), version: 1 }
+  })],
+  ['POST', /^\/project\/products$/, () => ({ id: nextId++ })],
+  ['PUT', /^\/project\/products\/(\d+)$/, () => null],
+  ['POST', /^\/project\/products\/(\d+)\/template\/publish/, () => ({ version: 2 })],
+
+  ['GET', /^\/project\/cockpit\/summary$/, () => ({
+    total: pmProjects.length,
+    byPhase: PM_PHASE_LIST.map((_, index) => pmProjects.filter((p) => p.phase === index + 1).length),
+    phaseNames: PM_PHASE_LIST,
+    byLight: {
+      GREEN: pmProjects.filter((p) => p.healthLight === 'GREEN').length,
+      YELLOW: pmProjects.filter((p) => p.healthLight === 'YELLOW').length,
+      RED: pmProjects.filter((p) => p.healthLight === 'RED').length
+    },
+    estimatedAmountTotal: pmProjects.reduce((sum, p) => sum + (p.estimatedAmount ?? 0), 0),
+    avgHealth: Math.round((pmProjects.reduce((sum, p) => sum + (p.healthScore ?? 0), 0) / pmProjects.length) * 100) / 100,
+    openTaskCount: pmTasks.filter((t) => t.status !== 'DONE').length,
+    alerts: pmProjects.filter((p) => p.healthLight !== 'GREEN' && p.healthLight !== 'GRAY')
+  })],
+
+  ['GET', /^\/project\/projects$/, ({ query }) => page(pmProjects, query)],
+  ['POST', /^\/project\/projects\/initiations$/, () => ({ projectId: nextId++, formId: nextId++ })],
+  ['GET', /^\/project\/projects\/(\d+)\/workspace$/, (_c, id) => ({
+    project: pmProjects.find((p) => p.id === Number(id)) ?? pmProjects[0],
+    tasks: pmTasks.filter((t) => t.projectId === Number(id)),
+    logs: pmLogs
+  })],
+  ['POST', /^\/project\/projects\/(\d+)\/advance$/, (_c, id) => {
+    const project = pmProjects.find((p) => p.id === Number(id))
+    if (project && project.phase < 6) {
+      const blocking = pmTasks.filter((t) => t.projectId === project.id && t.phase === project.phase && t.blocking === 1 && t.status !== 'DONE')
+      if (blocking.length > 0) {
+        throw new Error(`存在未完成的阻塞任务，禁止推进：${blocking.map((t) => t.taskName).join('、')}`)
+      }
+      project.phase += 1
+      project.status = ['INITIATING', 'PREPARING', 'IMPLEMENTING', 'PENDING_HANDOVER', 'OPERATING', 'CLOSING'][project.phase - 1]
+    }
+    return project
+  }],
+  ['GET', /^\/project\/projects\/(\d+)\/members$/, (_c, id) => pmMembers.filter((m) => m.projectId === Number(id))],
+  ['POST', /^\/project\/projects\/(\d+)\/members\/(\d+)$/, () => ({ memberId: nextId++ })],
+  ['PUT', /^\/project\/projects\/(\d+)\/members\/(\d+)$/, () => null],
+  ['DELETE', /^\/project\/projects\/(\d+)\/members\/(\d+)$/, () => null],
+  ['GET', /^\/project\/projects\/tasks\/(\d+)\/form$/, (_c, id) => {
+    const taskId = Number(id)
+    const task = pmTasks.find((t) => t.id === taskId)
+    if (!pmFormStatusMap[taskId]) pmFormStatusMap[taskId] = task && task.status === 'DONE' ? 'EFFECTIVE' : 'DRAFT'
+    return {
+      id: 50000 + taskId, projectId: task?.projectId ?? null, taskId, formCode: task?.formCode ?? 'pm_form_budget',
+      formData: '{}', status: pmFormStatusMap[taskId], submitUserName: '张伟', submitTime: null,
+      approveTime: null, approveComment: null
+    } satisfies PmFormSeed
+  }],
+  ['PUT', /^\/project\/projects\/forms\/(\d+)$/, () => null],
+  ['POST', /^\/project\/projects\/forms\/(\d+)\/submit$/, (_c, id) => {
+    const taskId = Number(id) - 50000
+    pmFormStatusMap[taskId] = 'APPROVING'
+    const task = pmTasks.find((t) => t.id === taskId)
+    if (task) task.status = 'APPROVING'
+    return { flowInstanceId: `demo-flow-${nextId++}` }
+  }],
+
+  ['GET', /^\/system\/users\/(\d+)\/projects\/ratio$/, () => ({ activeRatio: 60 })],
+  ['GET', /^\/system\/users\/(\d+)\/projects$/, (_c, id) => pmUserProjects(Number(id))],
+  ['POST', /^\/system\/users\/(\d+)\/projects$/, () => ({ memberId: nextId++ })]
 ]
 
 // ==================== 派生数据 ====================
@@ -866,6 +937,118 @@ function transferVo() {
     itemCount: 13, failCount: 0, revocable: false, createdTime: dayStr(-7), effectiveTime: dayStr(-6), remark: '演示数据'
   }]
 }
+
+// ==================== 项目管理模块（PM）mock ====================
+
+interface PmTaskSeed {
+  id: number; projectId: number; phase: number; category: string; taskName: string
+  taskType: 'FORM' | 'DATA' | 'COLLAB'; formCode: string; blocking: number
+  status: string; assigneeName: string; dueDate: string; sortNo: number
+}
+
+const PM_PHASE_LIST = ['项目立项', '项目筹备', '项目实施', '项目交接', '项目运营', '项目撤场']
+const PM_TASK_STATUS_MAP: Record<string, string> = {
+  NOT_STARTED: '未启动', IN_PROGRESS: '进行中', APPROVING: '审批中', DONE: '已完成', REJECTED: '已驳回'
+}
+
+const pmProducts = [
+  { id: 1, productCode: 'PM-PROD-001', productName: '法院全域诉源治理调解服务', bgOrgId: 2, bgOrgName: 'G端BG', pricingMode: 'UNIT_PRICE', templateVersion: 'v1.0', status: 'ON_SALE', remark: '面向基层法院的诉前调解驻场服务' },
+  { id: 2, productCode: 'PM-PROD-002', productName: '金融纠纷多元调解平台服务', bgOrgId: 2, bgOrgName: 'G端BG', pricingMode: 'COMMISSION', templateVersion: 'v1.0', status: 'ON_SALE', remark: '' },
+  { id: 3, productCode: 'PM-PROD-003', productName: '政务热线数据治理服务', bgOrgId: 6, bgOrgName: '数据资产BG', pricingMode: 'TOTAL_PACKAGE', templateVersion: 'v1.0', status: 'ON_SALE', remark: '' }
+]
+
+const pmTemplateSections = [
+  { phase: 1, phaseName: '项目立项', category: '立项申报', tasks: [
+    { name: '立项申请单', type: 'FORM', formCode: 'pm_form_initiation', blocking: true },
+    { name: '立项变更单', type: 'FORM', formCode: 'pm_form_init_change', blocking: false }] },
+  { phase: 2, phaseName: '项目筹备', category: '预算与编制', tasks: [
+    { name: '项目预算单', type: 'FORM', formCode: 'pm_form_budget', blocking: true },
+    { name: '编制申请单', type: 'FORM', formCode: 'pm_form_headcount', blocking: false }],
+  },
+  { phase: 2, phaseName: '项目筹备', category: '计划', tasks: [
+    { name: '项目计划单', type: 'FORM', formCode: 'pm_form_project_plan', blocking: true }] },
+  { phase: 3, phaseName: '项目实施', category: '进场', tasks: [
+    { name: '进场确认单', type: 'FORM', formCode: 'pm_form_site_entry', blocking: false },
+    { name: '人员上岗认证单', type: 'FORM', formCode: 'pm_form_staff_certification', blocking: false }] },
+  { phase: 4, phaseName: '项目交接', category: '验收', tasks: [
+    { name: '验收单', type: 'FORM', formCode: 'pm_form_acceptance', blocking: true },
+    { name: '项目交接单', type: 'FORM', formCode: 'pm_form_project_handover', blocking: true }] },
+  { phase: 5, phaseName: '项目运营', category: '财务', tasks: [
+    { name: '回款台账', type: 'DATA', formCode: 'pm_form_payment_ledger', blocking: true },
+    { name: '健康度评分卡', type: 'DATA', formCode: 'pm_form_health_scorecard', blocking: false }] },
+  { phase: 6, phaseName: '项目撤场', category: '收口', tasks: [
+    { name: '撤场申请单', type: 'FORM', formCode: 'pm_form_closing_apply', blocking: true },
+    { name: '卷宗移交清单', type: 'COLLAB', formCode: 'pm_form_case_file_transfer', blocking: false }] }
+]
+
+const pmProjects = [
+  { id: 1, projectCode: 'PRJ-G-202609-001', projectName: '海淀区法院诉源治理调解服务项目', productId: 1, productName: '法院全域诉源治理调解服务', templateVersion: 'v1.0', customerId: 1003, customerName: '北京市政务服务管理局', contractNo: 'HT202512-0010', signEntity: '国联政信有限公司', estimatedAmount: 4800000, annualCases: 12000, pricingMode: 'UNIT_PRICE', rating: 'A', phase: 5, status: 'OPERATING', healthScore: 87.5, healthLight: 'GREEN', grossMargin: 0.2834, ownerUserName: '张伟', createdTime: '2026-09-20 10:00:00' },
+  { id: 2, projectCode: 'PRJ-G-202610-002', projectName: '工商银行北京分行个贷调解项目', productId: 2, productName: '金融纠纷多元调解平台服务', templateVersion: 'v1.0', customerId: 1001, customerName: '中国工商银行股份有限公司北京市分行', contractNo: 'HT202512-0003', signEntity: '国联政信有限公司', estimatedAmount: 6500000, annualCases: 30000, pricingMode: 'COMMISSION', rating: 'B', phase: 2, status: 'PREPARING', healthScore: 74, healthLight: 'YELLOW', grossMargin: 0.22, ownerUserName: '张伟', createdTime: '2026-10-11 10:00:00' },
+  { id: 3, projectCode: 'PRJ-G-202610-003', projectName: '12345 热线工单数据治理项目', productId: 3, productName: '政务热线数据治理服务', templateVersion: 'v1.0', customerId: 1003, customerName: '北京市政务服务管理局', contractNo: null, signEntity: '国联政信有限公司', estimatedAmount: 1200000, annualCases: 8000, pricingMode: 'TOTAL_PACKAGE', rating: 'C', phase: 3, status: 'IMPLEMENTING', healthScore: 66, healthLight: 'RED', grossMargin: 0.15, ownerUserName: '王强', createdTime: '2026-10-18 10:00:00' }
+]
+
+const pmTasks: PmTaskSeed[] = []
+let pmTaskId = 90001
+for (const project of pmProjects) {
+  let sort = 0
+  for (const section of pmTemplateSections) {
+    for (const task of section.tasks) {
+      const status = section.phase < project.phase ? 'DONE' : section.phase === project.phase ? (sort % 3 === 0 ? 'DONE' : 'IN_PROGRESS') : 'NOT_STARTED'
+      pmTasks.push({
+        id: pmTaskId++, projectId: project.id, phase: section.phase, category: section.category,
+        taskName: task.name, taskType: task.type as PmTaskSeed['taskType'], formCode: task.formCode,
+        blocking: task.blocking ? 1 : 0, status, assigneeName: project.ownerUserName,
+        dueDate: section.phase >= project.phase ? '2026-11-15' : '2026-10-15', sortNo: sort++
+      })
+    }
+  }
+}
+
+const pmMembers = [
+  { id: 101, projectId: 1, userId: 2, userName: '张伟', projectRole: 'PROJECT_MANAGER', inputRatio: 30, joinDate: '2026-09-20', expectedLeaveDate: '2027-09-19', status: 'ACTIVE', evaluation: null },
+  { id: 102, projectId: 1, userId: 3, userName: '李娜', projectRole: 'IMPLEMENT_LEADER', inputRatio: 40, joinDate: '2026-09-25', expectedLeaveDate: null, status: 'ACTIVE', evaluation: null },
+  { id: 103, projectId: 1, userId: 4, userName: '王强', projectRole: 'FIELD_MEDIATOR', inputRatio: 30, joinDate: '2026-10-01', expectedLeaveDate: null, status: 'ACTIVE', evaluation: null },
+  { id: 105, projectId: 2, userId: 2, userName: '张伟', projectRole: 'PROJECT_MANAGER', inputRatio: 30, joinDate: '2026-10-11', expectedLeaveDate: '2027-10-10', status: 'ACTIVE', evaluation: null },
+  { id: 106, projectId: 2, userId: 6, userName: '陈静', projectRole: 'BUSINESS_REP', inputRatio: 30, joinDate: '2026-10-15', expectedLeaveDate: null, status: 'ACTIVE', evaluation: null },
+  { id: 107, projectId: 3, userId: 4, userName: '王强', projectRole: 'PROJECT_MANAGER', inputRatio: 40, joinDate: '2026-10-18', expectedLeaveDate: null, status: 'ACTIVE', evaluation: null }
+]
+
+const pmLogs = [
+  { action: 'INITIATION_APPROVED', detail: '立项审批通过，按模板 v1.0 实例化 6 环节任务', operatorName: '张伟', createdTime: '2026-09-20 09:30:00' },
+  { action: 'PHASE_ADVANCE', detail: '项目阶段推进：项目交接 → 项目运营', operatorName: '张伟', createdTime: '2026-10-10 15:00:00' },
+  { action: 'FORM_APPROVED', detail: '项目预算单 审批通过：预算基线锁定', operatorName: '李娜', createdTime: '2026-09-24 09:00:00' }
+]
+
+let pmFormId = 50010
+const pmFormStatusMap: Record<number, string> = {}
+
+interface PmFormSeed {
+  id: number
+  projectId: number | null
+  taskId: number | null
+  formCode: string
+  formData: string
+  status: string
+  submitUserName: string | null
+  submitTime: string | null
+  approveTime: string | null
+  approveComment: string | null
+}
+
+const pmUserProjects = (userId: number) =>
+  pmMembers
+    .filter((m) => m.userId === userId)
+    .map((m) => {
+      const project = pmProjects.find((p) => p.id === m.projectId)!
+      return {
+        memberId: m.id, projectId: project.id, projectCode: project.projectCode, projectName: project.projectName,
+        productName: project.productName, projectRole: m.projectRole,
+        projectRoleLabel: { PROJECT_MANAGER: '项目经理', IMPLEMENT_LEADER: '实施主管', FIELD_MEDIATOR: '驻场调解员', BUSINESS_REP: '商务代表', QC: '质检', OBSERVER: '只读观察者' }[m.projectRole] ?? m.projectRole,
+        inputRatio: m.inputRatio, joinDate: m.joinDate, expectedLeaveDate: m.expectedLeaveDate,
+        status: m.status, active: m.status === 'ACTIVE', evaluation: m.evaluation,
+        openTaskCount: pmTasks.filter((t) => t.projectId === project.id && t.status !== 'DONE').length
+      }
+    })
 
 // ==================== 入口 ====================
 

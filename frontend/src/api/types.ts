@@ -99,6 +99,9 @@ export interface UserVO {
   jobLevel?: string
   joinDate?: string
   leaveDate?: string
+  certStatus?: string
+  certItem?: string
+  certExpireDate?: string
   status: number
   defaultRoleId?: number
   orgId?: number

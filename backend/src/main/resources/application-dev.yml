@@ -13,8 +13,8 @@ spring:
     init:
       mode: always
       encoding: UTF-8
-      schema-locations: classpath:db/h2/schema.sql,classpath:db/h2/crm_schema.sql
-      data-locations: classpath:db/h2/data.sql,classpath:db/h2/crm_data.sql
+      schema-locations: classpath:db/h2/schema.sql,classpath:db/h2/crm_schema.sql,classpath:db/h2/pm_schema.sql
+      data-locations: classpath:db/h2/data.sql,classpath:db/h2/crm_data.sql,classpath:db/h2/pm_data.sql
       continue-on-error: false
   h2:
     console:

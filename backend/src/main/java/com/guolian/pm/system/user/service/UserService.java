@@ -28,6 +28,7 @@ import com.guolian.pm.system.user.mapper.SysUserMapper;
 import com.guolian.pm.system.user.mapper.SysUserRoleMapper;
 import com.guolian.pm.system.user.vo.UserVO;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -63,6 +64,7 @@ public class UserService {
     private final SensitivePolicyService sensitivePolicyService;
     private final OnlineSessionRegistry sessionRegistry;
     private final CacheService cache;
+    private final ObjectProvider<UserProjectProvider> projectProvider;
 
     // ---------------- 查询 ----------------
 
@@ -130,10 +132,14 @@ public class UserService {
     }
 
     /**
-     * 项目参与 Tab：数据由项目管理模块提供，本期为结构预留的空实现。
+     * 项目参与 Tab：委托项目管理模块返回（R-09 双向可查），未装配时为空。
      */
     public List<Object> projects(Long userId) {
-        return new ArrayList<>();
+        UserProjectProvider provider = projectProvider.getIfAvailable();
+        if (provider == null) {
+            return new ArrayList<>();
+        }
+        return new ArrayList<>(provider.projectsOf(userId));
     }
 
     // ---------------- 写入 ----------------
@@ -335,6 +341,9 @@ public class UserService {
             vo.setJobLevel(user.getJobLevel());
             vo.setJoinDate(user.getJoinDate());
             vo.setLeaveDate(user.getLeaveDate());
+            vo.setCertStatus(user.getCertStatus());
+            vo.setCertItem(user.getCertItem());
+            vo.setCertExpireDate(user.getCertExpireDate());
             vo.setStatus(user.getStatus());
             vo.setDefaultRoleId(user.getDefaultRoleId());
             vo.setLastLoginTime(user.getLastLoginTime());
@@ -442,6 +451,9 @@ public class UserService {
         user.setPosition(request.getPosition());
         user.setJobLevel(request.getJobLevel());
         user.setJoinDate(request.getJoinDate());
+        user.setCertStatus(request.getCertStatus());
+        user.setCertItem(request.getCertItem());
+        user.setCertExpireDate(request.getCertExpireDate());
         user.setStatus(request.getStatus());
         user.setRemark(request.getRemark());
     }

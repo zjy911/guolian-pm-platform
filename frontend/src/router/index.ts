@@ -7,10 +7,7 @@ const Layout = () => import('@/layout/index.vue')
 /** 业务模块占位页：由独立方案建设，底座只预留菜单、路由与权限位 */
 const placeholderRoutes: RouteRecordRaw[] = [
   { path: '/crm/payment', title: '回款管理', perm: 'crm:payment:list' },
-  { path: '/project/product', title: '产品管理', perm: 'project:product:list' },
-  { path: '/project/list', title: '项目列表', perm: 'project:project:list' },
   { path: '/project/board', title: '任务看板', perm: 'project:task:list' },
-  { path: '/project/initiation', title: '项目立项', perm: 'project:initiation:list' },
   { path: '/project/review', title: '项目评审', perm: 'project:review:list' },
   { path: '/project/acceptance', title: '项目验收', perm: 'project:acceptance:list' },
   { path: '/project/retro', title: '项目复盘', perm: 'project:retro:list' },
@@ -25,6 +22,34 @@ const placeholderRoutes: RouteRecordRaw[] = [
   component: () => import('@/views/placeholder/index.vue'),
   meta: { title: item.title, perm: item.perm, placeholder: true }
 }))
+
+/** 项目管理模块（PRD_项目管理模块 v1.0）：路径与 sys_menu.path 严格一致 */
+const projectRoutes: RouteRecordRaw[] = [
+  {
+    path: '/project/product',
+    name: 'pm-product',
+    component: () => import('@/views/project/product/index.vue'),
+    meta: { title: '产品管理', perm: 'project:product:list' }
+  },
+  {
+    path: '/project/list',
+    name: 'pm-project-list',
+    component: () => import('@/views/project/list/index.vue'),
+    meta: { title: '项目管理', perm: 'project:project:list' }
+  },
+  {
+    path: '/project/cockpit',
+    name: 'pm-cockpit',
+    component: () => import('@/views/project/cockpit/index.vue'),
+    meta: { title: '项目驾驶舱', perm: 'project:cockpit:view' }
+  },
+  {
+    path: '/project/workspace/:id',
+    name: 'pm-workspace',
+    component: () => import('@/views/project/workspace/index.vue'),
+    meta: { title: '项目工作台', perm: 'project:project:list' }
+  }
+]
 
 /** CRM 模块：路径与 sys_menu.path 严格一致，否则菜单点击会落到 403 */
 const crmRoutes: RouteRecordRaw[] = [
@@ -140,6 +165,7 @@ const routes: RouteRecordRaw[] = [
       { path: '', name: 'home', redirect: '/system/user' },
       ...crmRoutes,
       ...placeholderRoutes,
+      ...projectRoutes,
       {
         path: '/system/user',
         name: 'system-user',
