@@ -1,4 +1,4 @@
-import { createRouter, createWebHistory, type RouteRecordRaw } from 'vue-router'
+import { createRouter, createWebHistory, createWebHashHistory, type RouteRecordRaw } from 'vue-router'
 import { tokenStore } from '@/api/request'
 import { useUserStore } from '@/stores/user'
 
@@ -285,8 +285,14 @@ const routes: RouteRecordRaw[] = [
   { path: '/:pathMatch(.*)*', redirect: '/403' }
 ]
 
+// 演示构建（demo）部署在纯静态托管上，无 history fallback，刷新深链接会 404，故用 hash 路由；
+// 真实后端部署（dev/prod）仍使用干净的 History 路由。
+const demoMode = import.meta.env.MODE === 'demo'
+
 const router = createRouter({
-  history: createWebHistory(import.meta.env.BASE_URL),
+  history: demoMode
+    ? createWebHashHistory(import.meta.env.BASE_URL)
+    : createWebHistory(import.meta.env.BASE_URL),
   routes,
   scrollBehavior: () => ({ top: 0 })
 })
