@@ -59,7 +59,7 @@ class PlatformIntegrationTest {
     }
 
     @Test
-    @DisplayName("登录成功并下发 4 个一级菜单与按钮权限")
+    @DisplayName("登录成功并下发 5 个一级菜单与按钮权限")
     void loginAndMenus() throws Exception {
         JsonNode node = post("/api/v1/auth/login", null, "{\"username\":\"admin\",\"password\":\"Admin@123\"}");
         assertThat(node.get("code").asInt()).isZero();
@@ -67,8 +67,11 @@ class PlatformIntegrationTest {
         JsonNode profile = data.get("profile");
         assertThat(profile.get("orgName").asText()).isEqualTo("国联政信");
         assertThat(profile.get("dataScopeLabel").asText()).isEqualTo("全部数据");
-        assertThat(data.get("menus")).hasSize(4);
+        assertThat(data.get("menus")).hasSize(5);
         assertThat(data.get("menus").get(0).get("name").asText()).isEqualTo("CRM");
+        // 一级菜单集合：CRM / 项目管理 / 驾驶舱管理 / 系统管理 / 审批中心
+        assertThat(data.get("menus")).extracting(m -> m.get("name").asText())
+                .containsExactlyInAnyOrder("CRM", "项目管理", "驾驶舱管理", "系统管理", "审批中心");
         assertThat(profile.get("perms").size()).isGreaterThan(50);
     }
 
