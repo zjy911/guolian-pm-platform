@@ -1,24 +1,40 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { useUserStore } from '@/stores/user'
 import { useAppStore } from '@/stores/app'
+import { useUserStore } from '@/stores/user'
+import { useNavModules } from '@/composables/useNavModules'
 import type { MenuNode } from '@/api/types'
 
-const userStore = useUserStore()
 const appStore = useAppStore()
+const userStore = useUserStore()
 const route = useRoute()
 const router = useRouter()
 
 const expanded = ref<Record<number, boolean>>({})
 
-const menus = computed<MenuNode[]>(() => userStore.menus)
+// 左侧竖栏只展示「当前一级模块」下的分组（CRM / 项目管理 由顶栏切换）
+const { groups } = useNavModules()
+const menus = computed<MenuNode[]>(() => groups.value)
+
+function isLeafGroup(menu: MenuNode) {
+  return !menu.children?.length
+}
 
 function isGroupActive(menu: MenuNode) {
-  return menu.children?.some((child) => child.path === route.path)
+  if (isLeafGroup(menu)) {
+    return !!menu.path && route.path === menu.path
+  }
+  return menu.children.some(
+    (child) => child.path === route.path || (!!child.path && route.path.startsWith(`${child.path}/`))
+  )
 }
 
 function toggleGroup(menu: MenuNode) {
+  if (isLeafGroup(menu)) {
+    if (menu.path) router.push(menu.path)
+    return
+  }
   if (appStore.collapsed) {
     appStore.collapsed = false
   }
@@ -56,14 +72,14 @@ function go(path?: string) {
       <div v-for="menu in menus" :key="menu.id">
         <div
           class="pm-nav-group-title"
-          :class="{ 'is-active': isGroupActive(menu) }"
+          :class="{ 'is-active': isGroupActive(menu), 'is-leaf': isLeafGroup(menu) }"
           :title="menu.name"
           @click="toggleGroup(menu)"
         >
           <i :class="`ti ti-${menu.icon || 'circle'}`" style="font-size: 18px" />
           <span v-if="!appStore.collapsed" style="flex: 1">{{ menu.name }}</span>
           <i
-            v-if="!appStore.collapsed"
+            v-if="!appStore.collapsed && !isLeafGroup(menu)"
             class="ti"
             :class="isOpen(menu) ? 'ti-chevron-up' : 'ti-chevron-down'"
             style="font-size: 13px; opacity: 0.6"

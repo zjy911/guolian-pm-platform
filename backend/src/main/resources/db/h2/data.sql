@@ -82,7 +82,7 @@ INSERT INTO sys_user_company (id, user_id, company_id, relation_type, is_primary
  (2007,3,2,1,1),(2008,3,2,2,1),(2009,3,1,3,0),
  (2010,4,1,1,1),(2011,5,2,1,1),(2012,5,1,2,0),(2013,6,1,1,1);
 
--- ---------- 菜单：4 个一级 + 全部二级 + 系统管理按钮 ----------
+-- ---------- 菜单：5 个一级 + 全部二级 + 系统管理按钮 ----------
 INSERT INTO sys_menu (id, parent_id, menu_name, menu_type, path, component, perms, icon, sort_no, visible, status) VALUES
  (100,0,'CRM',1,'/crm','Layout',NULL,'users',1,1,1),
  (1101,100,'客户管理',2,'/crm/customer','placeholder/index','crm:customer:list','address-book',1,1,1),
@@ -109,6 +109,7 @@ INSERT INTO sys_menu (id, parent_id, menu_name, menu_type, path, component, perm
  (1304,102,'商务部看板',2,'/cockpit/business','placeholder/index','cockpit:business:view','chart-pie',4,1,1),
  (1305,102,'人事看板',2,'/cockpit/hr','placeholder/index','cockpit:hr:view','users',5,1,1),
  (103,0,'系统管理',1,'/system','Layout',NULL,'settings',4,1,1),
+ (91,0,'审批中心',1,'/flow/center','Layout',NULL,'git-merge',5,1,1),
  (1401,103,'用户管理',2,'/system/user','system/user/index','system:user:list','user',1,1,1),
  (1402,103,'账号交接',2,'/system/transfer','system/transfer/index','system:transfer:list','swap',2,1,1),
  (1403,103,'组织架构',2,'/system/org','system/org/index','system:org:list','sitemap',3,1,1),
@@ -178,7 +179,7 @@ INSERT INTO sys_role_menu (id, role_id, menu_id) VALUES
  (201105,102,1105),(201106,102,1106),(201107,102,1107),(201108,102,1108),(201109,102,1109),
  (201120,102,101),(201121,102,1201),(201122,102,1202),(201123,102,1203),(201124,102,1204),
  (201125,102,1205),(201126,102,1206),(201127,102,1207),
- (201140,102,103),(201141,102,1401);
+ (201140,102,103),(201141,102,1401),(201150,102,91);
 -- G端BG 调解员：CRM 客户/池/线索/跟进
 INSERT INTO sys_role_menu (id, role_id, menu_id) VALUES
  (201200,103,100),(201201,103,1101),(201202,103,1102),(201203,103,1103),(201204,103,1104),

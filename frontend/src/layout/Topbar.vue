@@ -5,6 +5,7 @@ import { useAppStore } from '@/stores/app'
 import { useUserStore } from '@/stores/user'
 import { authApi } from '@/api'
 import { DEMO as isDemo } from '@/api/demo'
+import { useNavModules, type NavModuleKey } from '@/composables/useNavModules'
 import NoticeDrawer from './NoticeDrawer.vue'
 
 const appStore = useAppStore()
@@ -12,6 +13,17 @@ const userStore = useUserStore()
 const router = useRouter()
 const panelOpen = ref(false)
 const keyword = ref('')
+
+// 顶部一级模块切换：CRM / 项目管理（左侧竖栏随模块切换分组）
+const { modules, activeKey, defaultPathOf } = useNavModules()
+
+async function switchModule(key: NavModuleKey) {
+  if (key === activeKey.value) return
+  const path = defaultPathOf(key)
+  if (path) {
+    await router.push(path)
+  }
+}
 
 const initial = computed(() => {
   const name = userStore.profile?.realName ?? ''
@@ -100,6 +112,25 @@ async function showScopeDebug() {
           style="font-size: 11px; padding: 2px 8px; border-radius: 999px; background: var(--pm-warning-bg, #fff7e6); color: #ad6800; border: 1px solid #ffd591; font-weight: 500"
         >演示模式</span>
       </div>
+
+      <span class="pm-topbar-divider" />
+
+      <nav class="pm-module-switch" role="tablist" aria-label="一级模块切换">
+        <button
+          v-for="mod in modules"
+          :key="mod.key"
+          type="button"
+          role="tab"
+          class="pm-module-switch-item"
+          :class="{ 'is-active': mod.key === activeKey }"
+          :aria-selected="mod.key === activeKey"
+          :title="mod.name"
+          @click="switchModule(mod.key)"
+        >
+          <i :class="`ti ti-${mod.icon}`" />
+          <span>{{ mod.shortName }}</span>
+        </button>
+      </nav>
     </div>
 
     <div style="display: flex; align-items: center; gap: 14px">

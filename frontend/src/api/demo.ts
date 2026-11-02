@@ -430,7 +430,7 @@ const MENUS: MenuNode[] = [
     ]
   },
   {
-    id: 102, parentId: 0, name: '驾驶舱', path: '/cockpit', type: 1, icon: 'dashboard', children: [
+    id: 102, parentId: 0, name: '驾驶舱管理', path: '/cockpit', type: 1, icon: 'dashboard', children: [
       m(1301, 102, '经营总览', '/cockpit/overview', 'chart-area'),
       m(1302, 102, '销售看板', '/cockpit/sales', 'chart-bar'),
       m(1303, 102, '地区部经营看板', '/cockpit/region', 'map'),
