@@ -157,15 +157,14 @@ UPDATE sys_menu SET component = 'crm/bid/index',         perms = 'crm:bid:list',
 UPDATE sys_menu SET component = 'crm/payment/index',     perms = 'crm:payment:list',     sort_no = 16 WHERE id = 1108;
 UPDATE sys_menu SET component = 'crm/churn/index',       perms = 'crm:account:list',     sort_no = 17 WHERE id = 1109;
 
+-- 一级分组与主菜单已由 data.sql 统一定义；此处仅补充「功能页仍在、菜单暂不展示」的扩展页（status=0）
 INSERT INTO sys_menu (id, parent_id, menu_name, menu_type, path, component, perms, icon, sort_no, visible, status) VALUES
- (1121,100,'客户认领审批',2,'/crm/claim','crm/pool/claim','crm:account:claim','user-check',3,1,1),
- (1122,100,'联系人管理',2,'/crm/contact','crm/contact/index','crm:contact:list','address-card',4,1,1),
- (1123,100,'线索转化工作台',2,'/crm/lead-convert','crm/lead/convert','crm:lead:convert','transform',6,1,1),
- (1120,100,'商机管理',2,'/crm/opportunity','crm/opportunity/index','crm:opportunity:list','briefcase',7,1,1),
- (1124,100,'商机漏斗',2,'/crm/opportunity-funnel','crm/opportunity/funnel','crm:opportunity:list','chart-funnel',8,1,1),
- (1125,100,'活动时间线',2,'/crm/activity-timeline','crm/activity/timeline','crm:activity:list','timeline',10,1,1),
- (1126,100,'合同到期预警',2,'/crm/contract-expire','crm/contract/expire','crm:contract:list','alarm',12,1,1),
- (1127,100,'投标日历',2,'/crm/bid-calendar','crm/bid/calendar','crm:bid:list','calendar-event',15,1,1);
+ (1121,220,'客户认领审批',2,'/crm/claim','crm/pool/claim','crm:account:claim','user-check',31,0,1),
+ (1123,210,'线索转化工作台',2,'/crm/lead-convert','crm/lead/convert','crm:lead:convert','transform',32,0,1),
+ (1124,230,'商机漏斗',2,'/crm/opportunity-funnel','crm/opportunity/funnel','crm:opportunity:list','chart-funnel',33,0,1),
+ (1125,220,'活动时间线',2,'/crm/activity-timeline','crm/activity/timeline','crm:activity:list','timeline',34,0,1),
+ (1126,250,'合同到期预警',2,'/crm/contract-expire','crm/contract/expire','crm:contract:list','alarm',35,0,1),
+ (1127,230,'投标日历',2,'/crm/bid-calendar','crm/bid/calendar','crm:bid:list','calendar-event',36,0,1);
 
 -- CRM 按钮权限位
 INSERT INTO sys_menu (id, parent_id, menu_name, menu_type, path, component, perms, icon, sort_no, visible, status) VALUES
@@ -222,7 +221,7 @@ INSERT INTO sys_menu (id, parent_id, menu_name, menu_type, path, component, perm
 -- uk_role_menu(role_id, menu_id) 唯一，必须 NOT EXISTS 幂等插入
 INSERT INTO sys_role_menu (id, role_id, menu_id)
 SELECT 300000 + m.id, 101, m.id FROM sys_menu m
-WHERE (m.id IN (100,1101,1102,1103,1104,1105,1106,1107,1108,1109,1120,1121,1122,1123,1124,1125,1126,1127)
+WHERE (m.id IN (210,220,230,240,250,1101,1102,1103,1104,1105,1106,1107,1108,1109,1120,1121,1122,1123,1124,1125,1126,1127)
     OR (m.id BETWEEN 9201 AND 9294))
   AND NOT EXISTS (SELECT 1 FROM sys_role_menu rm WHERE rm.role_id = 101 AND rm.menu_id = m.id);
 
@@ -234,28 +233,28 @@ WHERE (m.id IN (1120,1121,1122,1123,1124,1125,1126,1127)
   AND NOT EXISTS (SELECT 1 FROM sys_role_menu rm WHERE rm.role_id = 102 AND rm.menu_id = m.id);
 
 -- G端BG 调解员：客户 / 公共池 / 认领 / 联系人 / 线索 / 跟进
-INSERT INTO sys_role_menu (id, role_id, menu_id) VALUES
- (320001,103,1121),(320002,103,1122),
- (320011,103,9201),(320012,103,9203),(320013,103,9210),(320014,103,9220),
- (320015,103,9230),(320016,103,9231),(320017,103,9232),
- (320018,103,9240),(320019,103,9241),(320020,103,9242),(320021,103,9260),(320022,103,9261);
+INSERT INTO sys_role_menu (id, role_id, menu_id)
+SELECT 320000 + m.id, 103, m.id FROM sys_menu m
+WHERE (m.id IN (1121,1122) OR (m.id BETWEEN 9201 AND 9294))
+  AND NOT EXISTS (SELECT 1 FROM sys_role_menu rm WHERE rm.role_id = 103 AND rm.menu_id = m.id);
 
 -- 地区部运营：客户 / 公共池 / 线索 / 跟进（只读 + 认领）
-INSERT INTO sys_role_menu (id, role_id, menu_id) VALUES
- (330001,105,1122),(330011,105,9201),(330012,105,9210),(330013,105,9230),(330014,105,9240);
+INSERT INTO sys_role_menu (id, role_id, menu_id)
+SELECT 330000 + m.id, 105, m.id FROM sys_menu m
+WHERE (m.id IN (1122) OR (m.id BETWEEN 9201 AND 9294))
+  AND NOT EXISTS (SELECT 1 FROM sys_role_menu rm WHERE rm.role_id = 105 AND rm.menu_id = m.id);
 
 -- 商务经理：客户 / 联系人 / 合同 / 协议 / 投标 / 回款 + 到期预警 + 投标日历
-INSERT INTO sys_role_menu (id, role_id, menu_id) VALUES
- (340001,106,1122),(340002,106,1126),(340003,106,1127),
- (340011,106,9201),(340012,106,9230),(340013,106,9231),
- (340020,106,9270),(340021,106,9271),(340022,106,9272),(340023,106,9274),
- (340024,106,9275),(340025,106,9276),(340026,106,9277),
- (340030,106,9280),(340031,106,9281),(340032,106,9282),(340033,106,9284),
- (340040,106,9290),(340041,106,9291),(340042,106,9292),(340043,106,9294);
+INSERT INTO sys_role_menu (id, role_id, menu_id)
+SELECT 340000 + m.id, 106, m.id FROM sys_menu m
+WHERE (m.id IN (1122,1126,1127) OR (m.id BETWEEN 9201 AND 9294))
+  AND NOT EXISTS (SELECT 1 FROM sys_role_menu rm WHERE rm.role_id = 106 AND rm.menu_id = m.id);
 
 -- 只读访客：客户 / 线索列表（无任何操作位）
-INSERT INTO sys_role_menu (id, role_id, menu_id) VALUES
- (350001,107,100),(350002,107,1101),(350003,107,1103),(350004,107,9201),(350005,107,9240);
+INSERT INTO sys_role_menu (id, role_id, menu_id)
+SELECT 350000 + m.id, 107, m.id FROM sys_menu m
+WHERE (m.id IN (210,1101,1103) OR (m.id BETWEEN 9201 AND 9294))
+  AND NOT EXISTS (SELECT 1 FROM sys_role_menu rm WHERE rm.role_id = 107 AND rm.menu_id = m.id);
 
 -- ------------------------------------------------------------
 -- 7. 演示数据

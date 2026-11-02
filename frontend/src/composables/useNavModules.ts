@@ -17,11 +17,21 @@ export interface NavModule {
   groups: MenuNode[]
 }
 
-/** 项目管理模块下各分组的固定展示顺序（与信息架构约定一致） */
-const PM_GROUP_ORDER = ['项目管理', '系统管理', '驾驶舱管理', '审批中心']
+/** 两个模块共用的分组：首页、个人工作台（审批相关） */
+function isSharedGroup(menu: MenuNode): boolean {
+  const path = menu.path ?? ''
+  return path === '/home' || path.startsWith('/flow')
+}
 
+/** 分组归属 CRM：自身或其子级路径以 /crm 开头 */
 function isCrmGroup(menu: MenuNode): boolean {
-  return (menu.path ?? '').startsWith('/crm') || menu.name === 'CRM'
+  const paths = [menu.path ?? '', ...(menu.children ?? []).map((child) => child.path ?? '')]
+  return paths.some((path) => path.startsWith('/crm'))
+}
+
+/** 共用分组排在前，其余保持接口返回顺序 */
+function orderGroups(list: MenuNode[]): MenuNode[] {
+  return [...list.filter(isSharedGroup), ...list.filter((menu) => !isSharedGroup(menu))]
 }
 
 /** 取分组树里第一个可跳转的叶子路径（分组本身是叶子时用自身路径） */
@@ -40,7 +50,8 @@ function firstRouteOf(groups: MenuNode[]): string | undefined {
 /**
  * 一级模块导航：把后端返回的菜单树按「CRM / 项目管理」两个模块切分。
  * 当前模块由路由前缀推导（/crm/* 属于 CRM，其余属于项目管理），
- * 因此刷新页面、直接打开深链接都能落到正确的模块。
+ * 因此刷新页面、直接打开深链接都能落到正确的模块；
+ * 首页与个人工作台属于公共分组，两个模块下都会出现。
  */
 export function useNavModules() {
   const userStore = useUserStore()
@@ -48,20 +59,13 @@ export function useNavModules() {
 
   const modules = computed<NavModule[]>(() => {
     const all = userStore.menus ?? []
-    const crmGroups = all.filter(isCrmGroup)
-    const pmGroups = all
-      .filter((menu) => !isCrmGroup(menu))
-      .slice()
-      .sort((a, b) => {
-        const ai = PM_GROUP_ORDER.indexOf(a.name)
-        const bi = PM_GROUP_ORDER.indexOf(b.name)
-        return (ai < 0 ? PM_GROUP_ORDER.length : ai) - (bi < 0 ? PM_GROUP_ORDER.length : bi)
-      })
+    const crmGroups = orderGroups(all.filter((menu) => isSharedGroup(menu) || isCrmGroup(menu)))
+    const pmGroups = orderGroups(all.filter((menu) => isSharedGroup(menu) || !isCrmGroup(menu)))
 
     const list: NavModule[] = [
       { key: 'pm', shortName: '项目管理', name: '项目管理', icon: 'briefcase', groups: pmGroups }
     ]
-    if (crmGroups.length) {
+    if (all.some((menu) => isCrmGroup(menu))) {
       list.unshift({ key: 'crm', shortName: 'CRM', name: 'CRM 客户关系管理', icon: 'users', groups: crmGroups })
     }
     return list

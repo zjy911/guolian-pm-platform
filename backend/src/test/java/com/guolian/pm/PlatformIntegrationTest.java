@@ -67,11 +67,12 @@ class PlatformIntegrationTest {
         JsonNode profile = data.get("profile");
         assertThat(profile.get("orgName").asText()).isEqualTo("国联政信");
         assertThat(profile.get("dataScopeLabel").asText()).isEqualTo("全部数据");
-        assertThat(data.get("menus")).hasSize(5);
-        assertThat(data.get("menus").get(0).get("name").asText()).isEqualTo("CRM");
-        // 一级菜单集合：CRM / 项目管理 / 驾驶舱管理 / 系统管理 / 审批中心
+        assertThat(data.get("menus")).hasSize(12);
+        assertThat(data.get("menus").get(0).get("name").asText()).isEqualTo("首页");
+        // 一级分组：首页 + 个人工作台（公共）+ CRM 五组 + 项目四条线
         assertThat(data.get("menus")).extracting(m -> m.get("name").asText())
-                .containsExactlyInAnyOrder("CRM", "项目管理", "驾驶舱管理", "系统管理", "审批中心");
+                .contains("首页", "个人工作台", "线索管理", "客户管理", "商机/投标管理", "CRM看板", "文书管理",
+                        "资产管理", "产品管理", "项目管理", "项目看板", "系统管理");
         assertThat(profile.get("perms").size()).isGreaterThan(50);
     }
 
@@ -98,8 +99,10 @@ class PlatformIntegrationTest {
         assertThat(profile.get("roleName").asText()).isEqualTo("地区部-运营");
         assertThat(profile.get("dataScope").asText()).isEqualTo("ORG");
         // 新角色只有驾驶舱菜单
-        assertThat(switched.get("data").get("menus")).hasSize(1);
-        assertThat(switched.get("data").get("menus").get(0).get("name").asText()).isEqualTo("驾驶舱管理");
+        assertThat(switched.get("data").get("menus")).hasSize(3);
+        assertThat(switched.get("data").get("menus").get(0).get("name").asText()).isEqualTo("首页");
+        assertThat(switched.get("data").get("menus")).extracting(m -> m.get("name").asText())
+                .contains("个人工作台", "项目看板");
     }
 
     @Test

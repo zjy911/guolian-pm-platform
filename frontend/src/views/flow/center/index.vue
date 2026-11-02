@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
+import { useRoute } from 'vue-router'
 import PageHeader from '@/components/PageHeader.vue'
 import FormDrawer from '@/components/FormDrawer.vue'
 import { flowApi } from '@/api'
@@ -9,8 +10,13 @@ import { useUserStore } from '@/stores/user'
 
 const appStore = useAppStore()
 const userStore = useUserStore()
+const route = useRoute()
 
-const tab = ref<'todo' | 'done' | 'mine' | 'cc'>('todo')
+const tab = ref<'todo' | 'done' | 'mine' | 'cc'>(
+  (['todo', 'done', 'mine', 'cc'] as const).includes(route.meta.flowTab as 'todo')
+    ? (route.meta.flowTab as 'todo' | 'done' | 'mine' | 'cc')
+    : 'todo'
+)
 const todo = ref<FlowTaskVO[]>([])
 const done = ref<FlowTaskVO[]>([])
 const mine = ref<FlowInstanceVO[]>([])

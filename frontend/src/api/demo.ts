@@ -375,69 +375,96 @@ const m = (id: number, parentId: number, name: string, path: string, icon?: stri
   id, parentId, name, path, type: 2, icon, perms, children: []
 })
 
-const CRM_MENUS: MenuNode[] = [
-  m(1101, 100, '客户管理', '/crm/customer', 'address-book', 'crm:account:list'),
-  m(1102, 100, '公共客户池', '/crm/pool', 'users-group', 'crm:account:pool'),
-  m(1110, 100, '客户认领审批', '/crm/claim', 'user-check', 'crm:account:claim'),
-  m(1109, 100, '流失客户', '/crm/churn', 'user-off', 'crm:account:list'),
-  m(1111, 100, '联系人管理', '/crm/contact', 'users', 'crm:contact:list'),
-  m(1103, 100, '线索管理', '/crm/lead', 'bulb', 'crm:lead:list'),
-  m(1112, 100, '线索转化工作台', '/crm/lead-convert', 'transform', 'crm:lead:convert'),
-  m(1104, 100, '商机管理', '/crm/opportunity', 'progress', 'crm:opportunity:list'),
-  m(1113, 100, '商机漏斗', '/crm/opportunity-funnel', 'chart-funnel', 'crm:opportunity:list'),
-  m(1105, 100, '销售活动', '/crm/follow', 'message', 'crm:activity:list'),
-  m(1114, 100, '活动时间线', '/crm/activity-timeline', 'timeline', 'crm:activity:list'),
-  m(1106, 100, '法务合同', '/crm/contract', 'file-text', 'crm:contract:list'),
-  m(1115, 100, '合同到期预警', '/crm/contract-expire', 'alert-triangle', 'crm:contract:list'),
-  m(1107, 100, '协议管理', '/crm/agreement', 'file-certificate', 'crm:agreement:list'),
-  m(1108, 100, '投标管理', '/crm/bid', 'gavel', 'crm:bid:list'),
-  m(1116, 100, '投标日历', '/crm/bid-calendar', 'calendar', 'crm:bid:list')
+const WORKBENCH_MENUS: MenuNode[] = [
+  m(2011, 201, '我发起的', '/flow/mine', 'send'),
+  m(2012, 201, '我处理的', '/flow/done', 'inbox'),
+  m(2013, 201, '抄送我的', '/flow/cc', 'mail-forward')
+]
+
+const CRM_GROUPS: MenuNode[] = [
+  {
+    id: 210, parentId: 0, name: '线索管理', path: '/crm/lead', type: 1, icon: 'bulb', children: [
+      m(1130, 210, '线索池', '/crm/lead-pool', 'inbox', 'crm:lead:list'),
+      m(1103, 210, '线索', '/crm/lead', 'bulb', 'crm:lead:list')
+    ]
+  },
+  {
+    id: 220, parentId: 0, name: '客户管理', path: '/crm/customer', type: 1, icon: 'address-book', children: [
+      m(1102, 220, '公海池', '/crm/pool', 'users-group', 'crm:account:pool'),
+      m(1101, 220, '客户管理', '/crm/customer', 'address-book', 'crm:account:list'),
+      m(1122, 220, '联系人管理', '/crm/contact', 'address-card', 'crm:contact:list')
+    ]
+  },
+  {
+    id: 230, parentId: 0, name: '商机/投标管理', path: '/crm/opportunity', type: 1, icon: 'progress', children: [
+      m(1120, 230, '商机管理', '/crm/opportunity', 'briefcase', 'crm:opportunity:list'),
+      m(1107, 230, '投标管理', '/crm/bid', 'gavel', 'crm:bid:list')
+    ]
+  },
+  {
+    id: 240, parentId: 0, name: 'CRM看板', path: '/crm/board', type: 1, icon: 'chart-bar', children: [
+      m(1131, 240, '线索分析', '/crm/board/lead', 'chart-line', 'crm:lead:list'),
+      m(1132, 240, '客户分析', '/crm/board/customer', 'chart-pie', 'crm:account:list'),
+      m(1133, 240, '商机分析', '/crm/board/opportunity', 'chart-funnel', 'crm:opportunity:list')
+    ]
+  },
+  {
+    id: 250, parentId: 0, name: '文书管理', path: '/crm/contract', type: 1, icon: 'file-text', children: [
+      m(1105, 250, '合同管理', '/crm/contract', 'file-text', 'crm:contract:list'),
+      m(1106, 250, '协议管理', '/crm/agreement', 'file-certificate', 'crm:agreement:list')
+    ]
+  }
 ]
 
 const SYSTEM_MENUS: MenuNode[] = [
-  m(101, 100, '用户管理', '/system/user', 'user', 'system:user:list'),
-  m(102, 100, '组织架构', '/system/org', 'sitemap', 'system:org:list'),
-  m(103, 100, '公司主体', '/system/company', 'building', 'system:company:list'),
-  m(104, 100, '角色管理', '/system/role', 'rosette-discount-check', 'system:role:list'),
-  m(105, 100, '菜单管理', '/system/menu', 'list', 'system:menu:list'),
-  m(106, 100, '字典管理', '/system/dict', 'book', 'system:dict:list'),
-  m(107, 100, '参数配置', '/system/config', 'settings', 'system:config:list'),
-  m(108, 100, '通知公告', '/system/notice', 'bell', 'system:notice:list'),
-  m(109, 100, '审批流程', '/system/flow', 'git-merge', 'system:flow:list'),
-  m(110, 100, '字段脱敏', '/system/sensitive', 'eye-off', 'system:sensitive:list'),
-  m(111, 100, '账号交接', '/system/transfer', 'arrows-right-left', 'system:transfer:list'),
-  m(112, 100, '操作日志', '/system/oper-log', 'history', 'system:log:oper'),
-  m(113, 100, '登录日志', '/system/login-log', 'login', 'system:log:login'),
-  m(114, 100, '在线用户', '/system/online', 'wifi', 'system:online:list')
+  m(1401, 340, '用户管理', '/system/user', 'user', 'system:user:list'),
+  m(1405, 340, '角色管理', '/system/role', 'shield-lock', 'system:role:list'),
+  m(1404, 340, '公司主体', '/system/company', 'building', 'system:company:list'),
+  m(1403, 340, '组织架构', '/system/org', 'sitemap', 'system:org:list'),
+  m(1406, 340, '菜单管理', '/system/menu', 'list-details', 'system:menu:list'),
+  m(1411, 340, '参数配置', '/system/config', 'adjustments', 'system:config:list'),
+  m(1410, 340, '字典管理', '/system/dict', 'book', 'system:dict:list'),
+  m(1412, 340, '通知管理', '/system/notice', 'bell', 'system:notice:list'),
+  m(1407, 340, '审批流程', '/system/flow', 'git-branch', 'system:flow:list')
+]
+
+const PM_GROUPS: MenuNode[] = [
+  {
+    id: 300, parentId: 0, name: '资产管理', path: '/project/asset', type: 1, icon: 'building-community', children: [
+      m(1501, 300, '资产管理', '/project/asset', 'archive', 'project:asset:list')
+    ]
+  },
+  {
+    id: 310, parentId: 0, name: '产品管理', path: '/project/product', type: 1, icon: 'box', children: [
+      m(1201, 310, '产品管理', '/project/product', 'box', 'project:product:list'),
+      m(1502, 310, '产品分类管理', '/project/product-category', 'category', 'project:product:list')
+    ]
+  },
+  {
+    id: 320, parentId: 0, name: '项目管理', path: '/project/list', type: 1, icon: 'briefcase', children: [
+      m(1202, 320, '项目管理', '/project/list', 'list-check', 'project:project:list'),
+      m(1503, 320, '任务管理', '/project/task', 'list-details', 'project:project:list')
+    ]
+  },
+  {
+    id: 330, parentId: 0, name: '项目看板', path: '/project/board', type: 1, icon: 'chart-dots', children: [
+      m(1504, 330, '项目分析', '/project/board/project', 'chart-area', 'project:cockpit:view'),
+      m(1505, 330, '任务分析', '/project/board/task', 'chart-bar', 'project:cockpit:view'),
+      m(1506, 330, '地区经营分析', '/project/board/region', 'map', 'cockpit:region:view')
+    ]
+  },
+  {
+    id: 340, parentId: 0, name: '系统管理', path: '/system', type: 1, icon: 'settings', children: SYSTEM_MENUS
+  }
 ]
 
 const MENUS: MenuNode[] = [
-  { id: 100, parentId: 0, name: 'CRM', path: '/crm', type: 1, icon: 'users', children: CRM_MENUS },
-  { id: 90, parentId: 0, name: '系统管理', path: '/system', type: 1, icon: 'settings', children: SYSTEM_MENUS },
+  { id: 200, parentId: 0, name: '首页', path: '/home', type: 1, icon: 'home', children: [] },
   {
-    id: 91, parentId: 0, name: '审批中心', path: '/flow/center', type: 1, icon: 'git-merge', children: [],
-    perms: undefined
+    id: 201, parentId: 0, name: '个人工作台', path: '/flow', type: 1, icon: 'layout-dashboard', children: WORKBENCH_MENUS
   },
-  {
-    id: 101, parentId: 0, name: '项目管理', path: '/project', type: 1, icon: 'briefcase', children: [
-      m(1201, 101, '产品管理', '/project/product', 'box'),
-      m(1202, 101, '项目列表', '/project/list', 'list'),
-      m(1203, 101, '任务看板', '/project/board', 'layout-kanban'),
-      m(1204, 101, '项目立项', '/project/initiation', 'flag'),
-      m(1205, 101, '项目评审', '/project/review', 'checklist'),
-      m(1206, 101, '项目验收', '/project/acceptance', 'circle-check'),
-      m(1207, 101, '项目复盘', '/project/retro', 'refresh')
-    ]
-  },
-  {
-    id: 102, parentId: 0, name: '驾驶舱管理', path: '/cockpit', type: 1, icon: 'dashboard', children: [
-      m(1301, 102, '经营总览', '/cockpit/overview', 'chart-area'),
-      m(1302, 102, '销售看板', '/cockpit/sales', 'chart-bar'),
-      m(1303, 102, '地区部经营看板', '/cockpit/region', 'map'),
-      m(1304, 102, '商务部看板', '/cockpit/business', 'building-bank'),
-      m(1305, 102, '人事看板', '/cockpit/hr', 'users-group')
-    ]
-  }
+  ...CRM_GROUPS,
+  ...PM_GROUPS
 ]
 
 function profileOf(): Profile {

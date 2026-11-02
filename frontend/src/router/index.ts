@@ -6,8 +6,17 @@ const Layout = () => import('@/layout/index.vue')
 
 /** 业务模块占位页：由独立方案建设，底座只预留菜单、路由与权限位 */
 const placeholderRoutes: RouteRecordRaw[] = [
+  { path: '/crm/lead-pool', title: '线索池', perm: 'crm:lead:list' },
+  { path: '/crm/board/lead', title: '线索分析', perm: 'crm:lead:list' },
+  { path: '/crm/board/customer', title: '客户分析', perm: 'crm:account:list' },
+  { path: '/crm/board/opportunity', title: '商机分析', perm: 'crm:opportunity:list' },
+  { path: '/project/asset', title: '资产管理', perm: 'project:asset:list' },
+  { path: '/project/product-category', title: '产品分类管理', perm: 'project:product:list' },
+  { path: '/project/task', title: '任务管理', perm: 'project:project:list' },
+  { path: '/project/board/project', title: '项目分析', perm: 'project:cockpit:view' },
+  { path: '/project/board/task', title: '任务分析', perm: 'project:cockpit:view' },
+  { path: '/project/board/region', title: '地区经营分析', perm: 'cockpit:region:view' },
   { path: '/crm/payment', title: '回款管理', perm: 'crm:payment:list' },
-  { path: '/project/board', title: '任务看板', perm: 'project:task:list' },
   { path: '/project/review', title: '项目评审', perm: 'project:review:list' },
   { path: '/project/acceptance', title: '项目验收', perm: 'project:acceptance:list' },
   { path: '/project/retro', title: '项目复盘', perm: 'project:retro:list' },
@@ -162,7 +171,13 @@ const routes: RouteRecordRaw[] = [
     path: '/',
     component: Layout,
     children: [
-      { path: '', name: 'home', redirect: '/system/user' },
+      { path: '', name: 'root', redirect: '/home' },
+      {
+        path: '/home',
+        name: 'home',
+        component: () => import('@/views/home/index.vue'),
+        meta: { title: '首页' }
+      },
       ...crmRoutes,
       ...placeholderRoutes,
       ...projectRoutes,
@@ -266,7 +281,25 @@ const routes: RouteRecordRaw[] = [
         path: '/flow/center',
         name: 'flow-center',
         component: () => import('@/views/flow/center/index.vue'),
-        meta: { title: '审批中心' }
+        meta: { title: '审批中心', flowTab: 'todo' }
+      },
+      {
+        path: '/flow/mine',
+        name: 'flow-mine',
+        component: () => import('@/views/flow/center/index.vue'),
+        meta: { title: '我发起的', flowTab: 'mine' }
+      },
+      {
+        path: '/flow/done',
+        name: 'flow-done',
+        component: () => import('@/views/flow/center/index.vue'),
+        meta: { title: '我处理的', flowTab: 'done' }
+      },
+      {
+        path: '/flow/cc',
+        name: 'flow-cc',
+        component: () => import('@/views/flow/center/index.vue'),
+        meta: { title: '抄送我的', flowTab: 'cc' }
       },
       {
         path: '/profile',

@@ -13,11 +13,13 @@ public interface SysMenuMapper extends BaseMapper<SysMenu> {
 
     /**
      * 当前角色可见菜单（目录/菜单，不含按钮），由后端下发，前端只维护静态路由表。
+     * visible=1 才在侧边栏展示；visible=0 的菜单不下发，但其权限位仍通过 selectPermsByRole 生效。
      */
     @Select("""
             select m.* from sys_menu m
             join sys_role_menu rm on rm.menu_id = m.id and rm.is_deleted = 0
-            where rm.role_id = #{roleId} and m.is_deleted = 0 and m.status = 1 and m.menu_type in (1, 2)
+            where rm.role_id = #{roleId} and m.is_deleted = 0 and m.status = 1
+              and m.menu_type in (1, 2) and m.visible = 1
             order by m.sort_no asc
             """)
     List<SysMenu> selectMenuByRole(@Param("roleId") Long roleId);

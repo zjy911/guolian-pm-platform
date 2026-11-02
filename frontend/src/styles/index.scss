@@ -69,6 +69,83 @@ a {
   gap: 16px;
 }
 
+// ---------- 首页 ----------
+.pm-home-stats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.pm-home-stat {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px;
+  border-radius: var(--pm-radius-card);
+  background: var(--pm-neutral-0);
+  box-shadow: var(--pm-shadow-card);
+  cursor: pointer;
+  transition: box-shadow 0.16s ease, transform 0.16s ease;
+
+  &:hover {
+    box-shadow: var(--pm-shadow-modal);
+    transform: translateY(-1px);
+  }
+
+  .pm-home-stat-icon {
+    width: 40px;
+    height: 40px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    font-size: 20px;
+    color: var(--pm-primary-700);
+    background: var(--pm-primary-50);
+  }
+
+  .pm-home-stat-value {
+    font-size: 22px;
+    font-weight: 600;
+    line-height: 28px;
+    color: var(--pm-neutral-900);
+  }
+
+  .pm-home-stat-label {
+    font-size: 12px;
+    color: var(--pm-neutral-500);
+  }
+}
+
+.pm-home-shortcuts {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 12px;
+}
+
+.pm-home-shortcut {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: var(--pm-radius-control);
+  border: 1px solid var(--pm-neutral-100);
+  cursor: pointer;
+  transition: border-color 0.16s ease, background 0.16s ease;
+
+  &:hover {
+    border-color: var(--pm-primary-200);
+    background: var(--pm-primary-50);
+  }
+}
+
+@media (max-width: 1200px) {
+  .pm-home-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
 // ---------- 顶栏一级模块切换（CRM / 项目管理）----------
 .pm-topbar-divider {
   width: 1px;

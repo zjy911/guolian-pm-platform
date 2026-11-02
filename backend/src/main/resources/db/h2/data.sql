@@ -84,48 +84,70 @@ INSERT INTO sys_user_company (id, user_id, company_id, relation_type, is_primary
 
 -- ---------- 菜单：5 个一级 + 全部二级 + 系统管理按钮 ----------
 INSERT INTO sys_menu (id, parent_id, menu_name, menu_type, path, component, perms, icon, sort_no, visible, status) VALUES
- (100,0,'CRM',1,'/crm','Layout',NULL,'users',1,1,1),
- (1101,100,'客户管理',2,'/crm/customer','placeholder/index','crm:customer:list','address-book',1,1,1),
- (1102,100,'公共客户池',2,'/crm/pool','placeholder/index','crm:pool:list','users-group',2,1,1),
- (1103,100,'线索与商机',2,'/crm/lead','placeholder/index','crm:lead:list','bulb',3,1,1),
- (1104,100,'销售跟进',2,'/crm/follow','placeholder/index','crm:follow:list','progress',4,1,1),
- (1105,100,'法务合同',2,'/crm/contract','placeholder/index','crm:contract:list','file-text',5,1,1),
- (1106,100,'协议管理',2,'/crm/agreement','placeholder/index','crm:agreement:list','file-certificate',6,1,1),
- (1107,100,'投标管理',2,'/crm/bid','placeholder/index','crm:bid:list','gavel',7,1,1),
- (1108,100,'回款管理',2,'/crm/payment','placeholder/index','crm:payment:list','cash',8,1,1),
- (1109,100,'流失客户',2,'/crm/churn','placeholder/index','crm:churn:list','user-off',9,1,1),
- (101,0,'项目管理',1,'/project','Layout',NULL,'briefcase',2,1,1),
- (1201,101,'产品管理',2,'/project/product','project/product/index','project:product:list','box',1,1,1),
- (1202,101,'项目管理',2,'/project/list','project/list/index','project:project:list','list',2,1,1),
- (1203,101,'项目驾驶舱',2,'/project/cockpit','project/cockpit/index','project:cockpit:view','dashboard',3,1,1),
- (1204,101,'（预留）立项看板',2,'/project/board','placeholder/index','project:task:list','layout-kanban',4,1,0),
- (1205,101,'（预留）项目评审',2,'/project/review','placeholder/index','project:review:list','checks',5,1,0),
- (1206,101,'（预留）项目验收',2,'/project/acceptance','placeholder/index','project:acceptance:list','circle-check',6,1,0),
- (1207,101,'（预留）项目复盘',2,'/project/retro','placeholder/index','project:retro:list','history',7,1,0),
- (102,0,'驾驶舱管理',1,'/cockpit','Layout',NULL,'chart-dots',3,1,1),
- (1301,102,'经营总览',2,'/cockpit/overview','placeholder/index','cockpit:overview:view','dashboard',1,1,1),
- (1302,102,'销售看板',2,'/cockpit/sales','placeholder/index','cockpit:sales:view','chart-bar',2,1,1),
- (1303,102,'地区部经营看板',2,'/cockpit/region','placeholder/index','cockpit:region:view','map-2',3,1,1),
- (1304,102,'商务部看板',2,'/cockpit/business','placeholder/index','cockpit:business:view','chart-pie',4,1,1),
- (1305,102,'人事看板',2,'/cockpit/hr','placeholder/index','cockpit:hr:view','users',5,1,1),
- (103,0,'系统管理',1,'/system','Layout',NULL,'settings',4,1,1),
- (91,0,'审批中心',1,'/flow/center','Layout',NULL,'git-merge',5,1,1),
+ (200,0,'首页',2,'/home','home/index',NULL,'home',1,1,1),
+ (201,0,'个人工作台',1,'/flow','Layout',NULL,'layout-dashboard',2,1,1),
+ (2011,201,'我发起的',2,'/flow/mine','flow/center/index',NULL,'send',1,1,1),
+ (2012,201,'我处理的',2,'/flow/done','flow/center/index',NULL,'inbox',2,1,1),
+ (2013,201,'抄送我的',2,'/flow/cc','flow/center/index',NULL,'mail-forward',3,1,1),
+ (210,0,'线索管理',1,'/crm/lead','Layout',NULL,'bulb',3,1,1),
+ (1130,210,'线索池',2,'/crm/lead-pool','placeholder/index','crm:lead:list','inbox',1,1,1),
+ (1103,210,'线索',2,'/crm/lead','crm/lead/index','crm:lead:list','bulb',2,1,1),
+ (220,0,'客户管理',1,'/crm/customer','Layout',NULL,'address-book',4,1,1),
+ (1102,220,'公海池',2,'/crm/pool','crm/pool/index','crm:account:pool','users-group',1,1,1),
+ (1101,220,'客户管理',2,'/crm/customer','crm/account/index','crm:account:list','address-book',2,1,1),
+ (1122,220,'联系人管理',2,'/crm/contact','crm/contact/index','crm:contact:list','address-card',3,1,1),
+ (1104,220,'销售跟进',2,'/crm/follow','crm/activity/index','crm:activity:list','progress',4,0,1),
+ (1109,220,'流失客户',2,'/crm/churn','crm/churn/index','crm:churn:list','user-off',5,0,1),
+ (230,0,'商机/投标管理',1,'/crm/opportunity','Layout',NULL,'progress',5,1,1),
+ (1120,230,'商机管理',2,'/crm/opportunity','crm/opportunity/index','crm:opportunity:list','briefcase',1,1,1),
+ (1107,230,'投标管理',2,'/crm/bid','crm/bid/index','crm:bid:list','gavel',2,1,1),
+ (240,0,'CRM看板',1,'/crm/board','Layout',NULL,'chart-bar',6,1,1),
+ (1131,240,'线索分析',2,'/crm/board/lead','placeholder/index','crm:lead:list','chart-line',1,1,1),
+ (1132,240,'客户分析',2,'/crm/board/customer','placeholder/index','crm:account:list','chart-pie',2,1,1),
+ (1133,240,'商机分析',2,'/crm/board/opportunity','placeholder/index','crm:opportunity:list','chart-funnel',3,1,1),
+ (250,0,'文书管理',1,'/crm/contract','Layout',NULL,'file-text',7,1,1),
+ (1105,250,'合同管理',2,'/crm/contract','crm/contract/index','crm:contract:list','file-text',1,1,1),
+ (1106,250,'协议管理',2,'/crm/agreement','crm/agreement/index','crm:agreement:list','file-certificate',2,1,1),
+ (1108,250,'回款管理',2,'/crm/payment','placeholder/index','crm:payment:list','cash',3,0,1),
+ (300,0,'资产管理',1,'/project/asset','Layout',NULL,'building-community',8,1,1),
+ (1501,300,'资产管理',2,'/project/asset','placeholder/index','project:asset:list','archive',1,1,1),
+ (310,0,'产品管理',1,'/project/product','Layout',NULL,'box',9,1,1),
+ (1201,310,'产品管理',2,'/project/product','project/product/index','project:product:list','box',1,1,1),
+ (1502,310,'产品分类管理',2,'/project/product-category','placeholder/index','project:product:list','category',2,1,1),
+ (320,0,'项目管理',1,'/project/list','Layout',NULL,'briefcase',10,1,1),
+ (1202,320,'项目管理',2,'/project/list','project/list/index','project:project:list','list-check',1,1,1),
+ (1203,320,'项目驾驶舱',2,'/project/cockpit','project/cockpit/index','project:cockpit:view','dashboard',2,1,1),
+ (1503,320,'任务管理',2,'/project/task','placeholder/index','project:project:list','list-details',3,1,1),
+ (1204,320,'（预留）项目评审',2,'/project/review','placeholder/index','project:review:list','checks',4,0,1),
+ (1205,320,'（预留）项目验收',2,'/project/acceptance','placeholder/index','project:acceptance:list','circle-check',5,0,1),
+ (1206,320,'（预留）项目复盘',2,'/project/retro','placeholder/index','project:retro:list','history',6,0,1),
+ (330,0,'项目看板',1,'/project/board','Layout',NULL,'chart-dots',11,1,1),
+ (1504,330,'项目分析',2,'/project/board/project','placeholder/index','project:cockpit:view','chart-area',1,1,1),
+ (1505,330,'任务分析',2,'/project/board/task','placeholder/index','project:cockpit:view','chart-bar',2,1,1),
+ (1506,330,'地区经营分析',2,'/project/board/region','placeholder/index','cockpit:region:view','map',3,1,1),
+ (103,0,'系统管理',1,'/system','Layout',NULL,'settings',12,1,1),
  (1401,103,'用户管理',2,'/system/user','system/user/index','system:user:list','user',1,1,1),
- (1402,103,'账号交接',2,'/system/transfer','system/transfer/index','system:transfer:list','swap',2,1,1),
- (1403,103,'组织架构',2,'/system/org','system/org/index','system:org:list','sitemap',3,1,1),
- (1404,103,'公司主体',2,'/system/company','system/company/index','system:company:list','building',4,1,1),
- (1405,103,'角色管理',2,'/system/role','system/role/index','system:role:list','shield-lock',5,1,1),
- (1406,103,'菜单管理',2,'/system/menu','system/menu/index','system:menu:list','list-details',6,1,1),
- (1407,103,'审批流程',2,'/system/flow','system/flow/index','system:flow:list','git-branch',7,1,1),
- (1408,103,'数据权限',2,'/system/data-scope','system/data-scope/index','system:role:data-scope','database',8,1,1),
- (1409,103,'字段脱敏',2,'/system/sensitive','system/sensitive/index','system:sensitive:list','eye-off',9,1,1),
- (1410,103,'字典管理',2,'/system/dict','system/dict/index','system:dict:list','book',10,1,1),
- (1411,103,'参数配置',2,'/system/config','system/config/index','system:config:list','adjustments',11,1,1),
- (1412,103,'通知公告',2,'/system/notice','system/notice/index','system:notice:list','bell',12,1,1),
- (1413,103,'操作日志',2,'/system/oper-log','system/log/oper/index','system:log:oper','list',13,1,1),
- (1414,103,'登录日志',2,'/system/login-log','system/log/login/index','system:log:login','login',14,1,1),
- (1415,103,'在线用户',2,'/system/online','system/online/index','system:online:list','users-group',15,1,1),
- (1416,103,'附件管理',2,'/system/file','system/file/index','system:file:list','paperclip',16,1,1),
+ (1405,103,'角色管理',2,'/system/role','system/role/index','system:role:list','shield-lock',2,1,1),
+ (1404,103,'公司主体',2,'/system/company','system/company/index','system:company:list','building',3,1,1),
+ (1403,103,'组织架构',2,'/system/org','system/org/index','system:org:list','sitemap',4,1,1),
+ (1406,103,'菜单管理',2,'/system/menu','system/menu/index','system:menu:list','list-details',5,1,1),
+ (1411,103,'参数配置',2,'/system/config','system/config/index','system:config:list','adjustments',6,1,1),
+ (1410,103,'字典管理',2,'/system/dict','system/dict/index','system:dict:list','book',7,1,1),
+ (1412,103,'通知管理',2,'/system/notice','system/notice/index','system:notice:list','bell',8,1,1),
+ (1407,103,'审批流程',2,'/system/flow','system/flow/index','system:flow:list','git-branch',9,1,1),
+ (1402,103,'账号交接',2,'/system/transfer','system/transfer/index','system:transfer:list','swap',20,0,1),
+ (1408,103,'数据权限',2,'/system/data-scope','system/data-scope/index','system:role:data-scope','database',21,0,1),
+ (1409,103,'字段脱敏',2,'/system/sensitive','system/sensitive/index','system:sensitive:list','eye-off',22,0,1),
+ (1413,103,'操作日志',2,'/system/oper-log','system/log/oper/index','system:log:oper','list',23,0,1),
+ (1414,103,'登录日志',2,'/system/login-log','system/log/login/index','system:log:login','login',24,0,1),
+ (1415,103,'在线用户',2,'/system/online','system/online/index','system:online:list','users-group',25,0,1),
+ (1416,103,'附件管理',2,'/system/file','system/file/index','system:file:list','paperclip',26,0,1),
+ (102,0,'驾驶舱管理',1,'/cockpit','Layout',NULL,'chart-dots',90,0,1),
+ (1301,102,'经营总览',2,'/cockpit/overview','placeholder/index','cockpit:overview:view','dashboard',1,0,1),
+ (1302,102,'销售看板',2,'/cockpit/sales','placeholder/index','cockpit:sales:view','chart-bar',2,0,1),
+ (1303,102,'地区部经营看板',2,'/cockpit/region','placeholder/index','cockpit:region:view','map-2',3,0,1),
+ (1304,102,'商务部看板',2,'/cockpit/business','placeholder/index','cockpit:business:view','chart-pie',4,0,1),
+ (1305,102,'人事看板',2,'/cockpit/hr','placeholder/index','cockpit:hr:view','users',5,0,1),
  (9001,1401,'新增用户',3,NULL,NULL,'system:user:add',NULL,1,1,1),
  (9002,1401,'修改用户',3,NULL,NULL,'system:user:edit',NULL,2,1,1),
  (9003,1401,'删除用户',3,NULL,NULL,'system:user:remove',NULL,3,1,1),
@@ -173,29 +195,41 @@ INSERT INTO sys_menu (id, parent_id, menu_name, menu_type, path, component, perm
 -- 超管：全部
 INSERT INTO sys_role_menu (id, role_id, menu_id)
 SELECT 100000 + m.id, 101, m.id FROM sys_menu m;
--- G端BG 项目经理：CRM + 项目管理 + 用户管理（只读）
+-- G端BG 项目经理：工作台 + CRM 全量 + 项目/系统（只读）
 INSERT INTO sys_role_menu (id, role_id, menu_id) VALUES
- (201100,102,100),(201101,102,1101),(201102,102,1102),(201103,102,1103),(201104,102,1104),
- (201105,102,1105),(201106,102,1106),(201107,102,1107),(201108,102,1108),(201109,102,1109),
- (201120,102,101),(201121,102,1201),(201122,102,1202),(201123,102,1203),(201124,102,1204),
- (201125,102,1205),(201126,102,1206),(201127,102,1207),
- (201140,102,103),(201141,102,1401),(201150,102,91);
--- G端BG 调解员：CRM 客户/池/线索/跟进
+ (201100,102,200),(201101,102,201),(201102,102,2011),(201103,102,2012),(201104,102,2013),
+ (201110,102,210),(201111,102,1130),(201112,102,1103),
+ (201120,102,220),(201121,102,1102),(201122,102,1101),(201123,102,1122),
+ (201130,102,230),(201131,102,1120),(201132,102,1107),
+ (201140,102,240),(201141,102,1131),(201142,102,1132),(201143,102,1133),
+ (201150,102,250),(201151,102,1105),(201152,102,1106),
+ (201160,102,320),(201161,102,1202),(201162,102,1503),
+ (201170,102,103),(201171,102,1401);
+-- G端BG 调解员：工作台 + 线索/客户
 INSERT INTO sys_role_menu (id, role_id, menu_id) VALUES
- (201200,103,100),(201201,103,1101),(201202,103,1102),(201203,103,1103),(201204,103,1104),
- (201205,103,103),(201206,103,1401);
--- 和合BG 项目经理：项目管理
+ (201200,103,200),(201201,103,201),(201202,103,2011),(201203,103,2012),(201204,103,2013),
+ (201210,103,210),(201211,103,1130),(201212,103,1103),
+ (201220,103,220),(201221,103,1102),(201222,103,1101),(201223,103,1122),
+ (201230,103,103),(201231,103,1401);
+-- 和合BG 项目经理：工作台 + 资产/产品/项目/看板
 INSERT INTO sys_role_menu (id, role_id, menu_id) VALUES
- (201300,104,101),(201301,104,1201),(201302,104,1202),(201303,104,1203);
--- 地区部运营：驾驶舱
+ (201300,104,200),(201301,104,201),(201302,104,2011),(201303,104,2012),(201304,104,2013),
+ (201310,104,300),(201311,104,1501),
+ (201320,104,310),(201321,104,1201),(201322,104,1502),
+ (201330,104,320),(201331,104,1202),(201332,104,1503),
+ (201340,104,330),(201341,104,1504),(201342,104,1505),(201343,104,1506);
+-- 地区部运营：工作台 + 项目看板
 INSERT INTO sys_role_menu (id, role_id, menu_id) VALUES
- (201400,105,102),(201401,105,1301),(201402,105,1302),(201403,105,1303);
--- 商务经理：CRM 合同/协议/投标/回款
+ (201400,105,200),(201401,105,201),(201402,105,2011),(201403,105,2012),(201404,105,2013),
+ (201410,105,330),(201411,105,1504),(201412,105,1505),(201413,105,1506);
+-- 商务经理：工作台 + 商机/投标 + 文书
 INSERT INTO sys_role_menu (id, role_id, menu_id) VALUES
- (201500,106,100),(201501,106,1105),(201502,106,1106),(201503,106,1107),(201504,106,1108);
--- 只读访客：用户管理列表
+ (201500,106,200),(201501,106,201),(201502,106,2011),(201503,106,2012),(201504,106,2013),
+ (201510,106,230),(201511,106,1120),(201512,106,1107),
+ (201520,106,250),(201521,106,1105),(201522,106,1106);
+-- 只读访客：首页 + 用户管理列表
 INSERT INTO sys_role_menu (id, role_id, menu_id) VALUES
- (201600,107,103),(201601,107,1401);
+ (201600,107,200),(201601,107,103),(201602,107,1401);
 
 -- ---------- 脱敏：字段组 ----------
 INSERT INTO sys_sensitive_group (id, group_code, group_name, default_level, risk_level, sort_no, status, remark) VALUES
