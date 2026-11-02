@@ -80,10 +80,15 @@ export function useNavModules() {
   /** 当前模块在竖栏中应展示的分组 */
   const groups = computed<MenuNode[]>(() => activeModule.value?.groups ?? [])
 
-  /** 切换模块时的默认落地页 */
+  /**
+   * 切换模块时的落地页：必须优先取该模块「自己的」分组，
+   * 否则会落到公共分组（首页 / 个人工作台）上，导致切换后仍停在原模块。
+   */
   function defaultPathOf(key: NavModuleKey): string | undefined {
     const target = modules.value.find((item) => item.key === key)
-    return target ? firstRouteOf(target.groups) : undefined
+    if (!target) return undefined
+    const ownGroups = target.groups.filter((menu) => !isSharedGroup(menu))
+    return firstRouteOf(ownGroups) ?? firstRouteOf(target.groups)
   }
 
   return { modules, activeKey, activeModule, groups, defaultPathOf }
